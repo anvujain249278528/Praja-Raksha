@@ -1,20 +1,142 @@
 {
-  "_note": "SAMPLE reviews for DEMO lawyer listings only. Shown in the app with a 'Sample (demo)' label. Never attached to real police stations or real organisations.",
+  "_note": "SAMPLE reviews for DEMO listings only (fictional lawyers and the fictional 'Demo Police Station'). Shown with a 'Sample (demo)' label. Never attached to real police stations or real organisations.",
   "reviews": [
-    {"target_id": "adv-01", "rating": 5, "text": "Explained the cyber crime sections in simple Kannada and helped me write to the bank the same day. Clear about fees.", "case_category": "cyber_crime", "created_at": "2026-10-28T11:20:00"},
-    {"target_id": "adv-01", "rating": 4, "text": "Very knowledgeable about online fraud cases. Office was busy so I waited about 40 minutes.", "case_category": "fraud_cheating", "created_at": "2026-11-06T16:05:00"},
-    {"target_id": "adv-02", "rating": 4, "text": "Experienced and calm. Took time to read all my documents before giving advice.", "case_category": "property_theft", "created_at": "2026-10-19T10:40:00"},
-    {"target_id": "adv-02", "rating": 3, "text": "Good advice but replies to calls were slow. Fees were as quoted.", "case_category": "threat_intimidation", "created_at": "2026-11-02T13:15:00"},
-    {"target_id": "adv-03", "rating": 5, "text": "Very supportive in a domestic violence matter. Did not charge for the first meeting and explained the protection order process.", "case_category": "domestic_violence", "created_at": "2026-10-23T12:00:00"},
-    {"target_id": "adv-03", "rating": 5, "text": "Patient and respectful. Helped with the application to the Magistrate under the DV Act.", "case_category": "domestic_violence", "created_at": "2026-11-09T15:30:00"},
-    {"target_id": "adv-04", "rating": 4, "text": "Helped me recover unpaid wages from a contractor. Practical advice.", "case_category": "workplace_harassment", "created_at": "2026-10-30T09:50:00"},
-    {"target_id": "adv-05", "rating": 4, "text": "Filed my consumer complaint online through e-Daakhil. Simple process and low fee.", "case_category": "consumer", "created_at": "2026-10-25T17:10:00"},
-    {"target_id": "adv-05", "rating": 5, "text": "Knew exactly what to do about a UPI fraud. Asked me to call 1930 first, which helped freeze the money.", "case_category": "cyber_crime", "created_at": "2026-11-11T11:45:00"},
-    {"target_id": "adv-06", "rating": 4, "text": "Strong on cyber law. Expensive, but the notice he sent got the fake profile removed quickly.", "case_category": "cyber_crime", "created_at": "2026-10-21T14:25:00"},
-    {"target_id": "adv-07", "rating": 5, "text": "Made me feel safe talking about harassment. Explained every step and stayed in touch.", "case_category": "harassment_women", "created_at": "2026-11-04T10:10:00"},
-    {"target_id": "adv-07", "rating": 4, "text": "Good guidance on a dowry harassment complaint. Hindi and Kannada both fine.", "case_category": "domestic_violence", "created_at": "2026-11-12T18:00:00"},
-    {"target_id": "adv-08", "rating": 3, "text": "Knows property law well but was hard to reach on phone.", "case_category": "property_theft", "created_at": "2026-10-17T12:35:00"},
-    {"target_id": "adv-09", "rating": 5, "text": "Helped me file a POSH complaint at work and prepared me for the committee hearing.", "case_category": "workplace_harassment", "created_at": "2026-11-07T16:50:00"},
-    {"target_id": "adv-10", "rating": 4, "text": "Took up a caste abuse case seriously and guided me on the SC/ST Act.", "case_category": "caste_atrocity", "created_at": "2026-10-27T11:00:00"}
+    {
+      "target_id": "adv-01",
+      "rating": 5,
+      "text": "Explained the cyber crime sections in simple Kannada and helped me write to the bank the same day. Clear about fees.",
+      "case_category": "cyber_crime",
+      "created_at": "2026-10-28T11:20:00"
+    },
+    {
+      "target_id": "adv-01",
+      "rating": 4,
+      "text": "Very knowledgeable about online fraud cases. Office was busy so I waited about 40 minutes.",
+      "case_category": "fraud_cheating",
+      "created_at": "2026-11-06T16:05:00"
+    },
+    {
+      "target_id": "adv-02",
+      "rating": 4,
+      "text": "Experienced and calm. Took time to read all my documents before giving advice.",
+      "case_category": "property_theft",
+      "created_at": "2026-10-19T10:40:00"
+    },
+    {
+      "target_id": "adv-02",
+      "rating": 3,
+      "text": "Good advice but replies to calls were slow. Fees were as quoted.",
+      "case_category": "threat_intimidation",
+      "created_at": "2026-11-02T13:15:00"
+    },
+    {
+      "target_id": "adv-03",
+      "rating": 5,
+      "text": "Very supportive in a domestic violence matter. Did not charge for the first meeting and explained the protection order process.",
+      "case_category": "domestic_violence",
+      "created_at": "2026-10-23T12:00:00"
+    },
+    {
+      "target_id": "adv-03",
+      "rating": 5,
+      "text": "Patient and respectful. Helped with the application to the Magistrate under the DV Act.",
+      "case_category": "domestic_violence",
+      "created_at": "2026-11-09T15:30:00"
+    },
+    {
+      "target_id": "adv-04",
+      "rating": 4,
+      "text": "Helped me recover unpaid wages from a contractor. Practical advice.",
+      "case_category": "workplace_harassment",
+      "created_at": "2026-10-30T09:50:00"
+    },
+    {
+      "target_id": "adv-05",
+      "rating": 4,
+      "text": "Filed my consumer complaint online through e-Daakhil. Simple process and low fee.",
+      "case_category": "consumer",
+      "created_at": "2026-10-25T17:10:00"
+    },
+    {
+      "target_id": "adv-05",
+      "rating": 5,
+      "text": "Knew exactly what to do about a UPI fraud. Asked me to call 1930 first, which helped freeze the money.",
+      "case_category": "cyber_crime",
+      "created_at": "2026-11-11T11:45:00"
+    },
+    {
+      "target_id": "adv-06",
+      "rating": 4,
+      "text": "Strong on cyber law. Expensive, but the notice he sent got the fake profile removed quickly.",
+      "case_category": "cyber_crime",
+      "created_at": "2026-10-21T14:25:00"
+    },
+    {
+      "target_id": "adv-07",
+      "rating": 5,
+      "text": "Made me feel safe talking about harassment. Explained every step and stayed in touch.",
+      "case_category": "harassment_women",
+      "created_at": "2026-11-04T10:10:00"
+    },
+    {
+      "target_id": "adv-07",
+      "rating": 4,
+      "text": "Good guidance on a dowry harassment complaint. Hindi and Kannada both fine.",
+      "case_category": "domestic_violence",
+      "created_at": "2026-11-12T18:00:00"
+    },
+    {
+      "target_id": "adv-08",
+      "rating": 3,
+      "text": "Knows property law well but was hard to reach on phone.",
+      "case_category": "property_theft",
+      "created_at": "2026-10-17T12:35:00"
+    },
+    {
+      "target_id": "adv-09",
+      "rating": 5,
+      "text": "Helped me file a POSH complaint at work and prepared me for the committee hearing.",
+      "case_category": "workplace_harassment",
+      "created_at": "2026-11-07T16:50:00"
+    },
+    {
+      "target_id": "adv-10",
+      "rating": 4,
+      "text": "Took up a caste abuse case seriously and guided me on the SC/ST Act.",
+      "case_category": "caste_atrocity",
+      "created_at": "2026-10-27T11:00:00"
+    },
+    {
+      "target_type": "police",
+      "target_id": "demo-police-1",
+      "rating": 5,
+      "text": "Registered my complaint about online harassment on the same visit and gave me a copy of the FIR. Women constable was present.",
+      "case_category": "harassment_women",
+      "created_at": "2026-11-03T12:30:00"
+    },
+    {
+      "target_type": "police",
+      "target_id": "demo-police-1",
+      "rating": 4,
+      "text": "Helpful duty officer. Asked me to call 1930 for the UPI fraud and noted the transaction details carefully.",
+      "case_category": "cyber_crime",
+      "created_at": "2026-11-08T19:10:00"
+    },
+    {
+      "target_type": "police",
+      "target_id": "demo-police-1",
+      "rating": 2,
+      "text": "Waited almost two hours and was first told to go to another station. Registered a Zero FIR only after I insisted.",
+      "case_category": "threat_intimidation",
+      "created_at": "2026-11-12T21:45:00"
+    },
+    {
+      "target_type": "police",
+      "target_id": "demo-police-1",
+      "rating": 3,
+      "text": "Complaint was accepted but no update for a week. Had to follow up twice by phone.",
+      "case_category": "property_theft",
+      "created_at": "2026-11-15T10:20:00"
+    }
   ]
 }

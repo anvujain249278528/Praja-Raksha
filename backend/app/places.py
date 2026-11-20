@@ -39,6 +39,7 @@ def _overpass(query: str) -> list:
     raise RuntimeError(f"All map servers are busy: {last}")
 
 
+DEMO_POLICE_ID = "demo-police-1"
 _cache: dict[tuple, tuple[float, list]] = {}
 
 # Which lawyer specialisations fit each complaint category from the Legal Analysis Agent
@@ -85,8 +86,11 @@ def police_stations(lat: float, lon: float, radius_m: int = 8000) -> list[dict]:
                 "is_women": "women" in name.lower() or "vanitha" in name.lower(),
             })
         _cache[key] = (time.time(), stations)
+    # One clearly-fictional listing so the rating feature can be demonstrated without touching real stations
+    demo = {"id": DEMO_POLICE_ID, "name": "Demo Police Station (Sample)", "lat": lat + 0.011, "lon": lon + 0.008,
+            "phone": None, "address": "Fictional listing for the prototype demo", "is_cyber": False, "is_women": False, "demo": True}
     out = [{**s, "distance_km": distance_km(lat, lon, s["lat"], s["lon"]), **db.rating_summary("police", s["id"])}
-           for s in stations]
+           for s in [*stations, demo]]
     return sorted(out, key=lambda s: s["distance_km"])
 
 

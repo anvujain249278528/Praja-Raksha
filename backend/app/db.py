@@ -220,13 +220,13 @@ def platform_stats() -> dict:
 
 
 def seed_sample_reviews():
-    """Add clearly-labelled SAMPLE reviews to DEMO lawyer listings only (never to real police stations)."""
+    """Add clearly-labelled SAMPLE reviews to DEMO listings only (never to real police stations or offices)."""
     path = DATA_DIR / "sample_reviews.json"
     if not path.exists():
         return
     with conn() as c:
-        if c.execute("SELECT COUNT(*) FROM reviews WHERE sample = 1").fetchone()[0]:
-            return
+        c.execute("DELETE FROM reviews WHERE sample = 1")  # samples are static; refresh them on start
         for r in json.loads(path.read_text(encoding="utf-8"))["reviews"]:
             c.execute("INSERT INTO reviews (target_type, target_id, rating, text, case_category, created_at, sample) "
-                      "VALUES ('lawyer', ?, ?, ?, ?, ?, 1)", (r["target_id"], r["rating"], r["text"], r["case_category"], r["created_at"]))
+                      "VALUES (?, ?, ?, ?, ?, ?, 1)", (r.get("target_type", "lawyer"), r["target_id"], r["rating"],
+                                                     r["text"], r["case_category"], r["created_at"]))

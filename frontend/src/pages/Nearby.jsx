@@ -134,7 +134,7 @@ export default function Nearby({ params }) {
             {where && <Marker position={center} icon={youIcon}><Popup>{where.label}</Popup></Marker>}
             {(items || []).map((p, i) => (
               <Marker key={p.id} position={[p.lat, p.lon]} eventHandlers={{ click: () => setSelected(p) }}
-                icon={dot(tab === 'police' ? (recommendedPolice(p, category) ? '#16a34a' : '#1e3a8a') : (p.free_legal_aid ? '#16a34a' : '#b45309'), i + 1)}>
+                icon={dot(p.demo && tab === 'police' ? '#64748b' : tab === 'police' ? (recommendedPolice(p, category) ? '#16a34a' : '#1e3a8a') : (p.free_legal_aid ? '#16a34a' : '#b45309'), i + 1)}>
                 <Popup><b>{p.name}</b><br />{p.distance_km} km away</Popup>
               </Marker>
             ))}
