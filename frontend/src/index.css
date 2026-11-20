@@ -19,3 +19,32 @@ body {
   100% { box-shadow: 0 0 0 14px rgb(239 68 68 / 0); }
 }
 .recording { animation: pulse-ring 1.2s infinite; }
+
+/* ---------- Home hero animation ---------- */
+@keyframes blob { 0%,100% { transform: translate(0,0) scale(1); } 33% { transform: translate(40px,-30px) scale(1.15); } 66% { transform: translate(-30px,25px) scale(.9); } }
+@keyframes grid-move { from { background-position: 0 0; } to { background-position: 0 48px; } }
+@keyframes ring { 0% { transform: scale(.6); opacity: .7; } 100% { transform: scale(2.2); opacity: 0; } }
+@keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-14px); } }
+@keyframes scan { 0% { top: 8%; } 100% { top: 88%; } }
+@keyframes word-in { 0% { opacity: 0; transform: translateY(14px); } 12%,88% { opacity: 1; transform: none; } 100% { opacity: 0; transform: translateY(-14px); } }
+@keyframes ticker { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+@keyframes rise { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
+
+.hero-blob { position: absolute; border-radius: 9999px; filter: blur(60px); opacity: .45; animation: blob 14s ease-in-out infinite; }
+.hero-grid {
+  position: absolute; inset: 0; opacity: .18;
+  background-image: linear-gradient(rgb(255 255 255 / .25) 1px, transparent 1px), linear-gradient(90deg, rgb(255 255 255 / .25) 1px, transparent 1px);
+  background-size: 48px 48px; animation: grid-move 3s linear infinite;
+  mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%);
+}
+.radar-ring { position: absolute; inset: 0; border-radius: 9999px; border: 2px solid rgb(245 158 11 / .6); animation: ring 3s ease-out infinite; }
+.float-chip { animation: float 5s ease-in-out infinite; }
+.scan-line { position: absolute; left: 10%; right: 10%; height: 2px; background: linear-gradient(90deg, transparent, #f59e0b, transparent); animation: scan 2.6s ease-in-out infinite alternate; }
+.word-cycle { animation: word-in 2.5s ease-in-out both; }
+.ticker-track { animation: ticker 60s linear infinite; }
+.ticker-track:hover { animation-play-state: paused; }
+.rise { animation: rise .7s ease-out both; }
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-blob, .hero-grid, .radar-ring, .float-chip, .scan-line, .word-cycle, .ticker-track, .rise, .recording { animation: none !important; }
+}

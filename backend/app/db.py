@@ -46,6 +46,7 @@ def init():
         c.executescript(SCHEMA)
         c.executescript(CASES_SCHEMA)
         c.executescript(DEMO_CLOCK_SCHEMA)
+        c.executescript(REVIEWS_SCHEMA)
 
 
 def new_ack_no(district: str) -> str:
@@ -162,3 +163,52 @@ def fast_forward(ack: str, days: int) -> bool:
         c.execute("INSERT INTO demo_clock (ack_no, days) VALUES (?, ?) "
                   "ON CONFLICT(ack_no) DO UPDATE SET days = days + excluded.days", (ack, days))
     return True
+
+
+# ---------- Citizen ratings & reviews of police stations and lawyers ----------
+REVIEWS_SCHEMA = """
+CREATE TABLE IF NOT EXISTS reviews (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    target_type TEXT NOT NULL,          -- 'police' or 'lawyer'
+    target_id TEXT NOT NULL,
+    rating INTEGER NOT NULL CHECK (rating BETWEEN 1 AND 5),
+    text TEXT NOT NULL,
+    case_category TEXT,
+    created_at TEXT NOT NULL
+);
+"""
+
+
+def add_review(target_type: str, target_id: str, rating: int, text: str, case_category: str = "") -> dict:
+    now = datetime.now().isoformat(timespec="seconds")
+    with conn() as c:
+        cur = c.execute("INSERT INTO reviews (target_type, target_id, rating, text, case_category, created_at) VALUES (?,?,?,?,?,?)",
+                        (target_type, target_id, rating, text, case_category, now))
+    return {"id": cur.lastrowid, "rating": rating, "text": text, "case_category": case_category, "created_at": now}
+
+
+def reviews_for(target_type: str, target_id: str) -> list[dict]:
+    with conn() as c:
+        rows = c.execute("SELECT id, rating, text, case_category, created_at FROM reviews "
+                         "WHERE target_type = ? AND target_id = ? ORDER BY id DESC LIMIT 50", (target_type, target_id))
+        return [dict(r) for r in rows]
+
+
+def rating_summary(target_type: str, target_id: str) -> dict:
+    with conn() as c:
+        avg, n = c.execute("SELECT AVG(rating), COUNT(*) FROM reviews WHERE target_type = ? AND target_id = ?",
+                           (target_type, target_id)).fetchone()
+    return {"rating": round(avg, 1) if avg else None, "review_count": n}
+
+
+def platform_stats() -> dict:
+    with conn() as c:
+        total = c.execute("SELECT COUNT(*) FROM complaints").fetchone()[0]
+        anon = c.execute("SELECT COUNT(*) FROM complaints WHERE anonymous = 1").fetchone()[0]
+        fir = c.execute("SELECT COUNT(*) FROM complaints WHERE status LIKE 'FIR%'").fetchone()[0]
+        escalated = c.execute("SELECT COUNT(*) FROM cases WHERE escalation_level > 0").fetchone()[0]
+        by_cat = [dict(r) for r in c.execute("SELECT category, COUNT(*) AS n FROM complaints GROUP BY category ORDER BY n DESC")]
+        by_district = [dict(r) for r in c.execute("SELECT district, COUNT(*) AS n FROM complaints GROUP BY district ORDER BY n DESC")]
+        reviews = c.execute("SELECT COUNT(*) FROM reviews").fetchone()[0]
+    return {"complaints_filed": total, "anonymous": anon, "fir_registered": fir, "escalations": escalated,
+            "reviews": reviews, "by_category": by_cat, "by_district": by_district}

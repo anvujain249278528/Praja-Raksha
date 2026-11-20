@@ -4,10 +4,13 @@ from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, Response
 from fastapi.staticfiles import StaticFiles
-from pydantic import BaseModel
+from typing import Literal
+
+from pydantic import BaseModel, Field
 
 from . import db
-from .agents import drafting_agent, evidence_agent, filing_agent, legal_agent, tracking_agent
+from . import news, places
+from .agents import drafting_agent, evidence_agent, filing_agent, legal_agent, moderation_agent, tracking_agent
 from .config import AUTO_TRACK_MINUTES
 from .portal.routes import router as portal_router
 
@@ -147,6 +150,51 @@ def filing_screenshot(job_id: str, n: int):
     if not job or not 0 <= n < len(job["shots"]):
         raise HTTPException(404, "No such screenshot")
     return Response(job["shots"][n], media_type="image/png")
+
+
+# ---------- Website: news, stats, nearby help, reviews ----------
+@app.get("/api/news")
+def get_news():
+    return news.latest()
+
+
+@app.get("/api/stats")
+def stats():
+    return db.platform_stats()
+
+
+@app.get("/api/places/police")
+def nearby_police(lat: float, lon: float, radius_km: float = 8):
+    try:
+        return places.police_stations(lat, lon, int(min(radius_km, 25) * 1000))
+    except Exception as e:
+        raise HTTPException(503, f"Map service is busy, please retry. ({str(e)[:80]})")
+
+
+@app.get("/api/places/lawyers")
+def nearby_lawyers(lat: float, lon: float, category: str = ""):
+    return places.lawyers(lat, lon, category)
+
+
+@app.get("/api/reviews/{target_type}/{target_id}")
+def get_reviews(target_type: Literal["police", "lawyer"], target_id: str):
+    return db.reviews_for(target_type, target_id)
+
+
+class ReviewRequest(BaseModel):
+    target_type: Literal["police", "lawyer"]
+    target_id: str = Field(max_length=80)
+    rating: int = Field(ge=1, le=5)
+    text: str = Field(min_length=10, max_length=1500)
+    case_category: str = ""
+
+
+@app.post("/api/reviews")
+def post_review(r: ReviewRequest):
+    verdict = moderation_agent.check(r.text, r.rating)
+    if not verdict.allowed:
+        raise HTTPException(422, f"Review not published: {verdict.reason}")
+    return db.add_review(r.target_type, r.target_id, r.rating, r.text.strip(), r.case_category)
 
 
 # Serve the built React app (frontend/dist) so the whole product runs from one URL.
