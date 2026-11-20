@@ -7,7 +7,16 @@ from datetime import datetime, timedelta, timezone
 from email.utils import parsedate_to_datetime
 
 TOPICS = ('("cyber fraud" OR "digital arrest" OR sextortion OR "online scam" OR stalking OR "dowry harassment" '
-          'OR "sexual harassment" OR "cyber crime" OR "chain snatching" OR robbery OR "cyber police")')
+          'OR "sexual harassment" OR "cyber crime" OR "chain snatching" OR "cyber police")')
+KARNATAKA = ["karnataka", "k'taka", "bengaluru", "bangalore", "mysuru", "mysore", "mangaluru", "mangalore", "hubballi",
+             "hubli", "dharwad", "belagavi", "belgaum", "kalaburagi", "gulbarga", "ballari", "bellary", "shivamogga",
+             "tumakuru", "udupi", "hassan", "mandya", "davanagere", "vijayapura", "raichur", "bidar", "kolar", "chikkamagaluru"]
+INDIA = ["india", "indian", "₹", "rs ", "rs.", "lakh", "crore", "fir ", "delhi", "mumbai", "chennai", "hyderabad", "kolkata",
+         "pune", "uttar pradesh", "bihar", "gujarat", "rajasthan", "kerala", "tamil nadu", "telangana", "maharashtra",
+         "punjab", "haryana", "odisha", "assam", "madhya pradesh", "andhra", "jharkhand", "noida", "gurugram", *KARNATAKA]
+ALIASES = {"mysuru": ["mysuru", "mysore"], "bengaluru": ["bengaluru", "bangalore"], "mangaluru": ["mangaluru", "mangalore"],
+           "belagavi": ["belagavi", "belgaum"], "kalaburagi": ["kalaburagi", "gulbarga"], "hubballi": ["hubballi", "hubli"],
+           "ballari": ["ballari", "bellary"], "shivamogga": ["shivamogga", "shimoga"], "tumakuru": ["tumakuru", "tumkur"]}
 CACHE_SECONDS = 30 * 60
 MAX_AGE_DAYS = 30
 _cache: dict[str, tuple[float, list]] = {}
@@ -39,9 +48,21 @@ def latest(place: str = "Karnataka", limit: int = 8) -> list[dict]:
         # Google sometimes ignores "when:7d"; keep only the last MAX_AGE_DAYS ourselves.
         cutoff = (datetime.now(timezone.utc) - timedelta(days=MAX_AGE_DAYS)).isoformat()
         items = [i for i in items if (i["published"] or "") >= cutoff]
+        # Keep only stories that are actually about the place (news search also returns loosely related foreign items)
+        words = _place_words(place)
+        items = [i for i in items if any(w in i["title"].lower() for w in words)]
         _cache[place.lower()] = (time.time(), items)
     except Exception as e:  # news is nice-to-have; never break the home page
         print(f"[news] fetch failed for {place}: {e}")
         if hit:
             return hit[1][:limit]
     return items[:limit]
+
+
+def _place_words(place: str) -> list[str]:
+    p = place.lower()
+    if p == "india":
+        return INDIA
+    if p == "karnataka":
+        return KARNATAKA
+    return ALIASES.get(p, [p])
