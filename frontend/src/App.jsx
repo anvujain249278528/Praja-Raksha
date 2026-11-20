@@ -4,6 +4,7 @@ import { postJson, uploadEvidence } from './api'
 import AgentPanel from './components/AgentPanel'
 import ComplaintForm, { EMPTY_PERSON } from './components/ComplaintForm'
 import DraftPanel from './components/DraftPanel'
+import FilingPanel from './components/FilingPanel'
 import Results from './components/Results'
 
 export default function App() {
@@ -19,7 +20,7 @@ export default function App() {
   }
 
   // The agent pipeline: Evidence -> Legal Analysis -> Drafting. Each agent's output feeds the next.
-  async function run({ text, files, person }) {
+  async function run({ text, files, person, anonymous }) {
     setBusy(true); setError(''); setResult(null); setStatus({}); setNotes({})
     let current = 'evidence'
     try {
@@ -36,7 +37,7 @@ export default function App() {
       mark('legal', 'running', 'Matching your facts against the legal database...')
       const analysis = await postJson('/analyze', { complaint: text, evidence_notes: evidence?.notes_for_legal_agent || '' })
       mark('legal', 'done', `${analysis.sections.length} sections found, ${analysis.severity} severity`)
-      setResult({ analysis, evidence, complaint: text, person, draft: null })
+      setResult({ analysis, evidence, complaint: text, person, anonymous, draft: null })
 
       current = 'draft'
       mark('draft', 'running', 'Writing your FIR complaint...')
@@ -46,7 +47,7 @@ export default function App() {
         evidence_summary: evidence?.overall_summary || '',
       })
       mark('draft', 'done', 'FIR complaint ready to download')
-      setResult({ analysis, evidence, complaint: text, person, draft })
+      setResult({ analysis, evidence, complaint: text, person, anonymous, draft })
     } catch (e) {
       mark(current, 'error', e.message)
       setError(e.message)
@@ -114,6 +115,11 @@ export default function App() {
               {result && (result.draft || !busy) && (
                 <DraftPanel key={result.draft?.text || 'none'} analysis={result.analysis} evidence={result.evidence}
                   complaint={result.complaint} person={result.person || EMPTY_PERSON} initialDraft={result.draft} />
+              )}
+              {result?.draft && (
+                <FilingPanel analysis={result.analysis} evidence={result.evidence} complaint={result.complaint}
+                  person={result.person || EMPTY_PERSON} anonymous={result.anonymous}
+                  onStatus={(s, note) => mark('filing', s, note)} />
               )}
             </div>
             <aside className="order-1 lg:order-2">

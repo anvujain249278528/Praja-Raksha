@@ -6,10 +6,14 @@ from fastapi.responses import FileResponse, Response
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
-from .agents import drafting_agent, evidence_agent, legal_agent
+from . import db
+from .agents import drafting_agent, evidence_agent, filing_agent, legal_agent
+from .portal.routes import router as portal_router
 
+db.init()
 app = FastAPI(title="Praja Raksha API")
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
+app.include_router(portal_router)
 
 
 def _run(fn, *args):
@@ -80,6 +84,54 @@ def pdf(req: PdfRequest):
     data = drafting_agent.to_pdf(req.text, req.title)
     return Response(data, media_type="application/pdf",
                     headers={"Content-Disposition": 'attachment; filename="praja-raksha-complaint.pdf"'})
+
+
+class FileRequest(BaseModel):
+    user_confirmed: bool
+    anonymous: bool = False
+    complaint: str
+    complainant: dict = {}
+    analysis: dict
+    evidence: dict | None = None
+    extra_info: str = ""
+
+
+@app.post("/api/file")
+def file_complaint(req: FileRequest):
+    if not req.user_confirmed:
+        raise HTTPException(400, "Please confirm the details are true before the agent files on your behalf.")
+    a = req.analysis
+    case = {
+        "user_confirmed": True,
+        "anonymous": req.anonymous,
+        # Anonymous: share only location (needed to route the complaint), never identity.
+        "complainant": {k: v for k, v in req.complainant.items()
+                        if v and (not req.anonymous or k in ("district", "police_station"))},
+        "complaint_in_own_words": req.complaint,
+        "summary": a.get("summary"),
+        "category": a.get("category"),
+        "sections": [f'{s["law"]} s.{s["section"]} ({s["title"]})' for s in a.get("sections", [])],
+        "additional_info_from_user": req.extra_info,
+    }
+    if req.evidence:
+        case["evidence"] = {k: req.evidence.get(k) for k in ("overall_summary", "accused_identifiers", "timeline")}
+    return {"job_id": filing_agent.start(case)}
+
+
+@app.get("/api/file/{job_id}")
+def filing_status(job_id: str):
+    job = filing_agent.JOBS.get(job_id)
+    if not job:
+        raise HTTPException(404, "Unknown filing job")
+    return filing_agent.public_view(job)
+
+
+@app.get("/api/file/{job_id}/shot/{n}")
+def filing_screenshot(job_id: str, n: int):
+    job = filing_agent.JOBS.get(job_id)
+    if not job or not 0 <= n < len(job["shots"]):
+        raise HTTPException(404, "No such screenshot")
+    return Response(job["shots"][n], media_type="image/png")
 
 
 # Serve the built React app (frontend/dist) so the whole product runs from one URL.

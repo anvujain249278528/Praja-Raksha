@@ -4,6 +4,7 @@ export const AGENTS = [
   { id: 'evidence', name: 'Evidence Agent', desc: 'Reads screenshots and recordings, builds a timeline' },
   { id: 'legal', name: 'Legal Analysis Agent', desc: 'Understands any language, finds the laws from a verified database' },
   { id: 'draft', name: 'Drafting Agent', desc: 'Writes your police complaint' },
+  { id: 'filing', name: 'Filing Agent', desc: 'Operates the complaint portal in a browser and files for you' },
 ]
 
 const ICON = {

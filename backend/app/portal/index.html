@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Demo e-Complaint Portal (Simulation)</title>
+<style>
+  :root { --ink:#1f2937; --muted:#6b7280; --line:#d1d5db; --brand:#0f5132; --err:#b91c1c; --bg:#f3f4f6; }
+  * { box-sizing: border-box; }
+  body { margin:0; font-family: Arial, Helvetica, sans-serif; background: var(--bg); color: var(--ink); }
+  .demo { background:#fde68a; color:#78350f; text-align:center; font-size:13px; padding:6px 12px; font-weight:bold; }
+  header { background: var(--brand); color:#fff; padding:14px 20px; }
+  header h1 { margin:0; font-size:20px; } header p { margin:2px 0 0; font-size:13px; opacity:.85; }
+  main { max-width: 760px; margin: 20px auto; background:#fff; border:1px solid var(--line); padding: 22px; }
+  .steps { display:flex; gap:6px; margin-bottom:18px; }
+  .steps span { flex:1; padding:8px; font-size:13px; text-align:center; background:#e5e7eb; color:var(--muted); }
+  .steps span.on { background: var(--brand); color:#fff; font-weight:bold; }
+  fieldset { border:none; padding:0; margin:0; display:none; } fieldset.on { display:block; }
+  legend { font-size:17px; font-weight:bold; margin-bottom:12px; }
+  label { display:block; margin:12px 0 4px; font-size:14px; font-weight:bold; }
+  .req::after { content:" *"; color: var(--err); }
+  input[type=text], input[type=tel], input[type=email], input[type=date], select, textarea {
+    width:100%; padding:9px; border:1px solid var(--line); font-size:14px; font-family:inherit; }
+  textarea { min-height: 120px; }
+  .hint { font-size:12px; color: var(--muted); margin-top:3px; }
+  .check { display:flex; gap:8px; align-items:flex-start; margin:14px 0; font-size:14px; }
+  .check label { margin:0; font-weight:normal; }
+  .error { color: var(--err); font-size:13px; margin-top:4px; }
+  .errors { background:#fef2f2; border:1px solid #fecaca; color: var(--err); padding:10px 12px; margin-bottom:12px; font-size:14px; display:none; }
+  .actions { display:flex; justify-content:space-between; margin-top:20px; }
+  button { padding:10px 22px; font-size:15px; border:none; cursor:pointer; background: var(--brand); color:#fff; font-weight:bold; }
+  button.secondary { background:#e5e7eb; color: var(--ink); }
+  .ack { text-align:center; padding: 10px 0; }
+  .ack .no { font-size:24px; font-weight:bold; color: var(--brand); border:2px dashed var(--brand); display:inline-block; padding:10px 18px; margin:10px 0; }
+  table { width:100%; border-collapse: collapse; font-size:14px; margin-top:14px; text-align:left; }
+  td { border:1px solid var(--line); padding:7px 9px; vertical-align: top; } td:first-child { width: 34%; background:#f9fafb; font-weight:bold; }
+  .hidden { display:none !important; }
+</style>
+</head>
+<body>
+<div class="demo">DEMO PORTAL - simulation of a government e-complaint website for the Praja Raksha prototype. Not an official site.</div>
+<header><h1>e-Complaint Portal (Demo)</h1><p>Online registration of complaints - Karnataka (simulation)</p></header>
+
+<main>
+  <form id="form" novalidate>
+    <div class="steps"><span id="s1" class="on">1. Complainant</span><span id="s2">2. Incident</span><span id="s3">3. Evidence &amp; Submit</span></div>
+    <div class="errors" id="errors" role="alert"></div>
+
+    <fieldset id="step1" class="on">
+      <legend>Complainant details</legend>
+      <div class="check"><input type="checkbox" id="anonymous" /><label for="anonymous">Report anonymously (your identity will not be recorded)</label></div>
+      <div id="identity">
+        <label for="name" class="req">Full name</label><input type="text" id="name" />
+        <label for="mobile" class="req">Mobile number</label><input type="tel" id="mobile" maxlength="10" /><div class="hint">10 digits, without +91</div>
+        <label for="email">Email</label><input type="email" id="email" />
+        <label for="address">Address</label><input type="text" id="address" />
+      </div>
+      <label for="district" class="req">District</label>
+      <select id="district"><option value="">-- Select district --</option></select>
+      <div class="actions"><span></span><button type="button" id="next1">Next</button></div>
+    </fieldset>
+
+    <fieldset id="step2">
+      <legend>Incident details</legend>
+      <label for="category" class="req">Complaint category</label>
+      <select id="category">
+        <option value="">-- Select category --</option>
+        <option value="cyber">Cyber crime (online fraud, hacking, online harassment, sextortion)</option>
+        <option value="women">Crime against women (harassment, stalking, molestation)</option>
+        <option value="domestic">Domestic violence / dowry</option>
+        <option value="fraud">Cheating / financial fraud (offline)</option>
+        <option value="threat">Threat / criminal intimidation</option>
+        <option value="assault">Physical assault / hurt</option>
+        <option value="theft">Theft / property crime</option>
+        <option value="child">Offence against a child</option>
+        <option value="other">Other</option>
+      </select>
+      <label for="incident_date" class="req">Date of incident</label><input type="date" id="incident_date" /><div class="hint">If it happened over several days, give the first date</div>
+      <label for="place" class="req">Place of incident</label><input type="text" id="place" /><div class="hint">Area / city, or "Online - WhatsApp", "Online - Instagram" etc.</div>
+      <label for="police_station">Police station (if known)</label><input type="text" id="police_station" />
+      <label for="accused">Details of accused (name, phone, social media ID, UPI ID)</label><input type="text" id="accused" />
+      <label for="description" class="req">Describe the incident</label><textarea id="description"></textarea><div class="hint">Minimum 100 characters. Mention what happened, when and how.</div>
+      <label for="sections">Applicable law sections (if known)</label><input type="text" id="sections" />
+      <div class="actions"><button type="button" class="secondary" id="back2">Back</button><button type="button" id="next2">Next</button></div>
+    </fieldset>
+
+    <fieldset id="step3">
+      <legend>Evidence &amp; declaration</legend>
+      <label for="evidence">List of evidence available</label><textarea id="evidence" style="min-height:80px"></textarea>
+      <div class="hint">Screenshots, recordings, transaction IDs etc. Keep originals safe; police may ask for them.</div>
+      <div class="check"><input type="checkbox" id="declaration" /><label for="declaration">I declare that the information given above is true to the best of my knowledge. I understand that giving false information is an offence.</label></div>
+      <div class="actions"><button type="button" class="secondary" id="back3">Back</button><button type="button" id="submit">Submit complaint</button></div>
+    </fieldset>
+  </form>
+
+  <section id="done" class="ack hidden">
+    <h2>Complaint registered successfully</h2>
+    <p>Your acknowledgement number is</p>
+    <div class="no" id="ack-number"></div>
+    <p class="hint">Use this number to track the status of your complaint.</p>
+    <table id="receipt"></table>
+  </section>
+</main>
+
+<script>
+const DISTRICTS = ["Bagalkote","Ballari","Belagavi","Bengaluru Rural","Bengaluru Urban","Bidar","Chamarajanagar","Chikkaballapura","Chikkamagaluru","Chitradurga","Dakshina Kannada","Davanagere","Dharwad","Gadag","Hassan","Haveri","Kalaburagi","Kodagu","Kolar","Koppal","Mandya","Mysuru","Raichur","Ramanagara","Shivamogga","Tumakuru","Udupi","Uttara Kannada","Vijayanagara","Vijayapura","Yadgir"];
+const $ = (id) => document.getElementById(id);
+DISTRICTS.forEach(d => $("district").add(new Option(d, d)));
+
+let step = 1;
+function show(n) {
+  step = n;
+  [1,2,3].forEach(i => { $("step"+i).classList.toggle("on", i===n); $("s"+i).classList.toggle("on", i===n); });
+  $("errors").style.display = "none";
+  document.querySelectorAll(".error").forEach(e => e.remove());
+  window.scrollTo(0, 0);
+}
+function fail(errs) {
+  document.querySelectorAll(".error").forEach(e => e.remove());
+  errs.forEach(([id, msg]) => { const d = document.createElement("div"); d.className = "error"; d.textContent = msg; $(id).insertAdjacentElement("afterend", d); });
+  $("errors").innerHTML = "<b>Please correct the following:</b><br>" + errs.map(e => "- " + e[1]).join("<br>");
+  $("errors").style.display = "block";
+  window.scrollTo(0, 0);
+  return false;
+}
+$("anonymous").addEventListener("change", e => $("identity").classList.toggle("hidden", e.target.checked));
+
+function check1() {
+  const errs = [];
+  if (!$("anonymous").checked) {
+    if (!$("name").value.trim()) errs.push(["name", "Full name is required"]);
+    if (!/^[6-9]\d{9}$/.test($("mobile").value)) errs.push(["mobile", "Enter a valid 10-digit mobile number starting with 6-9"]);
+    if ($("email").value && !/^\S+@\S+\.\S+$/.test($("email").value)) errs.push(["email", "Enter a valid email address"]);
+  }
+  if (!$("district").value) errs.push(["district", "Select a district"]);
+  return errs.length ? fail(errs) : true;
+}
+function check2() {
+  const errs = [];
+  if (!$("category").value) errs.push(["category", "Select a complaint category"]);
+  const d = $("incident_date").value;
+  if (!d) errs.push(["incident_date", "Date of incident is required"]);
+  else if (new Date(d) > new Date()) errs.push(["incident_date", "Date of incident cannot be in the future"]);
+  if (!$("place").value.trim()) errs.push(["place", "Place of incident is required"]);
+  if ($("description").value.trim().length < 100) errs.push(["description", "Description must be at least 100 characters (currently " + $("description").value.trim().length + ")"]);
+  return errs.length ? fail(errs) : true;
+}
+$("next1").onclick = () => check1() && show(2);
+$("next2").onclick = () => check2() && show(3);
+$("back2").onclick = () => show(1);
+$("back3").onclick = () => show(2);
+
+$("submit").onclick = async () => {
+  if (!$("declaration").checked) return fail([["declaration", "You must accept the declaration to submit"]]);
+  const v = id => $(id).value.trim();
+  const body = { anonymous: $("anonymous").checked, name: v("name"), mobile: v("mobile"), email: v("email"), address: v("address"),
+    district: v("district"), category: $("category").options[$("category").selectedIndex].text, incident_date: v("incident_date"),
+    place: v("place"), police_station: v("police_station"), accused: v("accused"), sections: v("sections"),
+    description: v("description"), evidence: v("evidence"), declaration: true };
+  $("submit").disabled = true; $("submit").textContent = "Submitting...";
+  try {
+    const r = await fetch("/portal/api/submit", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+    const j = await r.json();
+    if (!r.ok) throw new Error(j.detail || "Submission failed");
+    history.replaceState(null, "", "/portal/receipt/" + j.ack_no);
+    showReceipt(j.ack_no);
+  } catch (e) {
+    $("submit").disabled = false; $("submit").textContent = "Submit complaint";
+    fail([["declaration", e.message]]);
+  }
+};
+
+async function showReceipt(ack) {
+  const r = await fetch("/portal/api/complaint/" + encodeURIComponent(ack));
+  if (!r.ok) return;
+  const c = await r.json();
+  $("form").classList.add("hidden"); $("done").classList.remove("hidden");
+  $("ack-number").textContent = c.ack_no;
+  const rows = [["Filed on", c.created_at.replace("T", " ")], ["Status", c.status], ["Complainant", c.anonymous ? "Anonymous" : c.name],
+    ["District", c.district], ["Category", c.category], ["Date of incident", c.incident_date], ["Place", c.place],
+    ["Police station", c.police_station || "-"], ["Accused", c.accused || "-"], ["Sections", c.sections || "-"], ["Description", c.description]];
+  $("receipt").innerHTML = "";
+  rows.forEach(([k, val]) => { const tr = $("receipt").insertRow(); tr.insertCell().textContent = k; tr.insertCell().textContent = val; });
+}
+const m = location.pathname.match(/\/portal\/receipt\/(.+)$/);
+if (m) showReceipt(decodeURIComponent(m[1]));
+</script>
+</body>
+</html>

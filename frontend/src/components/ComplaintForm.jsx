@@ -1,4 +1,4 @@
-import { ChevronDown, FileAudio, ImageIcon, Mic, Send, Square, Upload, X } from 'lucide-react'
+import { ChevronDown, EyeOff, FileAudio, ImageIcon, Mic, Send, Square, Upload, User, X } from 'lucide-react'
 import { useRef, useState } from 'react'
 import { LANGUAGES, useVoiceInput, voiceSupported } from '../speech'
 
@@ -16,6 +16,7 @@ export default function ComplaintForm({ onSubmit, busy }) {
   const [files, setFiles] = useState([])
   const [person, setPerson] = useState(EMPTY_PERSON)
   const [showPerson, setShowPerson] = useState(false)
+  const [anonymous, setAnonymous] = useState(false)
   const fileInput = useRef(null)
   const voice = useVoiceInput(lang, (t) => setText((prev) => (prev ? `${prev} ${t}` : t)))
 
@@ -27,7 +28,7 @@ export default function ComplaintForm({ onSubmit, busy }) {
   function submit(e) {
     e.preventDefault()
     if (voice.listening) voice.stop()
-    onSubmit({ text: text.trim(), files, person })
+    onSubmit({ text: text.trim(), files, person, anonymous })
   }
 
   const canSubmit = text.trim().length >= 10 && !busy
@@ -94,14 +95,25 @@ export default function ComplaintForm({ onSubmit, busy }) {
         </ul>
       )}
 
+      {/* Public or anonymous complaint */}
+      <div className="mt-5 grid grid-cols-2 gap-2" role="radiogroup" aria-label="Complaint type">
+        {[[false, User, 'Public complaint', 'Filed in your name'], [true, EyeOff, 'Anonymous', 'Your identity stays hidden']].map(([val, Icon, title, sub]) => (
+          <button key={title} type="button" role="radio" aria-checked={anonymous === val} onClick={() => setAnonymous(val)}
+            className={`flex items-center gap-3 rounded-xl border-2 p-3 text-left transition ${anonymous === val ? 'border-brand-600 bg-brand-50' : 'border-slate-200 hover:border-slate-300'}`}>
+            <Icon size={20} className={anonymous === val ? 'text-brand-700' : 'text-slate-400'} />
+            <span><span className="block text-sm font-semibold text-slate-900">{title}</span><span className="block text-xs text-slate-500">{sub}</span></span>
+          </button>
+        ))}
+      </div>
+
       {/* Complainant details for the drafted complaint */}
       <button type="button" onClick={() => setShowPerson(!showPerson)} className="mt-5 flex items-center gap-1 text-sm font-semibold text-brand-700">
         <ChevronDown size={16} className={`transition ${showPerson ? 'rotate-180' : ''}`} />
-        Your details for the complaint letter (optional)
+        {anonymous ? 'Your district (needed even for anonymous complaints)' : 'Your details for the complaint (name, phone, address)'}
       </button>
       {showPerson && (
         <div className="mt-3 grid gap-3 sm:grid-cols-2">
-          {[['name', 'Full name'], ['phone', 'Phone'], ['address', 'Address'], ['email', 'Email'], ['police_station', 'Nearest police station'], ['district', 'District']].map(([k, label]) => (
+          {[['name', 'Full name'], ['phone', 'Phone'], ['address', 'Address'], ['email', 'Email'], ['police_station', 'Nearest police station'], ['district', 'District']].filter(([k]) => !anonymous || ['police_station', 'district'].includes(k)).map(([k, label]) => (
             <label key={k} className="text-sm">
               <span className="text-slate-600">{label}</span>
               <input value={person[k]} onChange={(e) => setPerson({ ...person, [k]: e.target.value })}
