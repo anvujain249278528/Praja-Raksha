@@ -32,6 +32,7 @@ class PortalSubmission(BaseModel):
 
 
 @router.get("/", include_in_schema=False)
+@router.get("/track", include_in_schema=False)
 @router.get("/receipt/{ack}", include_in_schema=False)
 def page(ack: str = ""):
     return FileResponse(PAGE)
@@ -58,3 +59,24 @@ def complaint(ack: str):
     if not c:
         raise HTTPException(404, "No complaint found with this acknowledgement number.")
     return c
+
+
+# ---- Demo-only "police side" controls, used to simulate what happens after filing ----
+class DemoStatus(BaseModel):
+    status: str
+    note: str = ""
+
+
+@router.post("/api/demo/{ack}/status")
+def demo_status(ack: str, s: DemoStatus):
+    if not db.set_status(ack, s.status, s.note):
+        raise HTTPException(404, "Unknown acknowledgement number")
+    return {"ok": True}
+
+
+@router.post("/api/demo/{ack}/age/{days}")
+def demo_age(ack: str, days: int):
+    """Fast-forward the clock for this complaint (filing date stays real)."""
+    if not 0 < days <= 90 or not db.fast_forward(ack, days):
+        raise HTTPException(400, "Unknown acknowledgement number or invalid days")
+    return {"ok": True}

@@ -55,12 +55,13 @@ CITIZEN'S OWN WORDS: {complaint}
 INCIDENT SUMMARY: {summary}
 APPLICABLE SECTIONS (cite exactly these, no others): {sections}
 EVIDENCE: {evidence}
-Rules: state facts in numbered order with dates where known; use placeholders like [date] for unknown facts;
+Rules: write in the first person as the complainant; never mention Praja Raksha, AI or any agent in the document;
+state facts in numbered order with dates where known; use placeholders like [date] for unknown facts;
 do not exaggerate or add facts not given; keep it under one and a half pages."""
 
 
 def draft(doc_type: DocType, analysis: dict, complainant: Complainant, evidence_summary: str = "",
-          complaint: str = "") -> dict:
+          complaint: str = "", as_of: date | None = None) -> dict:
     sections = "; ".join(f'{s["law"]} Section {s["section"]} ({s["title"]})' for s in analysis.get("sections", []))
     prompt = PROMPT.format(
         brief=DOC_BRIEFS[doc_type],
@@ -87,7 +88,7 @@ def draft(doc_type: DocType, analysis: dict, complainant: Complainant, evidence_
         d[key] = [_NUM.sub("", x) for x in d[key]]
     d["doc_type"] = doc_type
     d["complainant"] = complainant.model_dump()
-    d["date"] = date.today().strftime("%d-%m-%Y")
+    d["date"] = (as_of or date.today()).strftime("%d-%m-%Y")
     return d
 
 

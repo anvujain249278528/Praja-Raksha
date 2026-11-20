@@ -100,6 +100,23 @@
     <p class="hint">Use this number to track the status of your complaint.</p>
     <table id="receipt"></table>
   </section>
+
+  <section id="track" class="hidden">
+    <h2 style="margin-top:0">Track complaint status</h2>
+    <label for="track-ack" class="req">Acknowledgement number</label>
+    <input type="text" id="track-ack" placeholder="e.g. KA-MYS-20261120-123456" />
+    <div class="actions"><span></span><button type="button" id="track-btn">Track</button></div>
+    <div class="errors" id="track-error" role="alert"></div>
+    <div id="track-result" class="hidden">
+      <table>
+        <tr><td>Acknowledgement no.</td><td id="track-no"></td></tr>
+        <tr><td>Filed on</td><td id="track-filed"></td></tr>
+        <tr><td>Current status</td><td id="track-status" style="font-weight:bold"></td></tr>
+      </table>
+      <h3>Status history</h3>
+      <table id="track-history"></table>
+    </div>
+  </section>
 </main>
 
 <script>
@@ -184,6 +201,22 @@ async function showReceipt(ack) {
 }
 const m = location.pathname.match(/\/portal\/receipt\/(.+)$/);
 if (m) showReceipt(decodeURIComponent(m[1]));
+
+if (location.pathname.replace(/\/$/, "") === "/portal/track") {
+  $("form").classList.add("hidden"); $("track").classList.remove("hidden");
+  $("track-btn").onclick = async () => {
+    $("track-error").style.display = "none"; $("track-result").classList.add("hidden");
+    const r = await fetch("/portal/api/complaint/" + encodeURIComponent($("track-ack").value.trim()));
+    const c = await r.json();
+    if (!r.ok) { $("track-error").textContent = c.detail; $("track-error").style.display = "block"; return; }
+    $("track-no").textContent = c.ack_no; $("track-filed").textContent = c.created_at.replace("T", " ");
+    $("track-status").textContent = c.status;
+    $("track-history").innerHTML = "";
+    c.history.forEach(h => { const tr = $("track-history").insertRow(); tr.className = "hist";
+      tr.insertCell().textContent = h.at.replace("T", " "); tr.insertCell().textContent = h.status + (h.note ? " - " + h.note : ""); });
+    $("track-result").classList.remove("hidden");
+  };
+}
 </script>
 </body>
 </html>

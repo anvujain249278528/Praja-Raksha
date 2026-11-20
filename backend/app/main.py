@@ -7,13 +7,15 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 from . import db
-from .agents import drafting_agent, evidence_agent, filing_agent, legal_agent
+from .agents import drafting_agent, evidence_agent, filing_agent, legal_agent, tracking_agent
+from .config import AUTO_TRACK_MINUTES
 from .portal.routes import router as portal_router
 
 db.init()
 app = FastAPI(title="Praja Raksha API")
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
 app.include_router(portal_router)
+tracking_agent.start_background_checks(AUTO_TRACK_MINUTES)
 
 
 def _run(fn, *args):
@@ -115,7 +117,20 @@ def file_complaint(req: FileRequest):
     }
     if req.evidence:
         case["evidence"] = {k: req.evidence.get(k) for k in ("overall_summary", "accused_identifiers", "timeline")}
-    return {"job_id": filing_agent.start(case)}
+    # Remember the case so the Tracking Agent can follow up and draft escalation letters later.
+    payload = {"analysis": a, "complainant": case["complainant"], "complaint": req.complaint,
+               "anonymous": req.anonymous, "evidence_summary": (req.evidence or {}).get("overall_summary", "")}
+    return {"job_id": filing_agent.start(case, on_done=lambda ack: db.save_case(ack, payload))}
+
+
+@app.post("/api/track/{ack}")
+def track(ack: str):
+    try:
+        return tracking_agent.run(ack.strip())
+    except LookupError as e:
+        raise HTTPException(404, str(e))
+    except RuntimeError as e:
+        raise HTTPException(503, str(e))
 
 
 @app.get("/api/file/{job_id}")

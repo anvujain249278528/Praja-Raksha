@@ -6,6 +6,7 @@ import ComplaintForm, { EMPTY_PERSON } from './components/ComplaintForm'
 import DraftPanel from './components/DraftPanel'
 import FilingPanel from './components/FilingPanel'
 import Results from './components/Results'
+import TrackView from './components/TrackView'
 
 export default function App() {
   const [status, setStatus] = useState({})
@@ -56,7 +57,10 @@ export default function App() {
     }
   }
 
+  const [view, setView] = useState('help') // 'help' | 'track'
+  const [trackAck, setTrackAck] = useState('')
   const started = Object.keys(status).length > 0
+  const openTrack = (ack = '') => { setTrackAck(ack); setView('track'); window.scrollTo(0, 0) }
 
   return (
     <div className="min-h-screen">
@@ -67,10 +71,18 @@ export default function App() {
             <p className="text-xl font-extrabold tracking-tight">Praja Raksha</p>
             <p className="text-xs text-brand-100">Your AI Legal Shield</p>
           </div>
+          <nav className="ml-auto flex gap-1 text-sm font-semibold">
+            {[['help', 'Get help'], ['track', 'Track complaint']].map(([v, label]) => (
+              <button key={v} onClick={() => (v === 'track' ? openTrack(trackAck) : setView('help'))}
+                className={`rounded-lg px-3 py-2 transition ${view === v ? 'bg-white/15 text-white' : 'text-brand-100 hover:text-white'}`}>
+                {label}
+              </button>
+            ))}
+          </nav>
         </div>
       </header>
 
-      {!started && (
+      {view === 'help' && !started && (
         <section className="bg-brand-900 pb-24 text-white">
           <div className="mx-auto max-w-6xl px-4 pt-6">
             <h1 className="max-w-3xl text-3xl font-extrabold leading-tight sm:text-5xl">
@@ -84,8 +96,10 @@ export default function App() {
         </section>
       )}
 
-      <main className={`mx-auto max-w-6xl px-4 pb-16 ${started ? 'pt-6' : '-mt-16'}`}>
-        {!started ? (
+      <main className={`mx-auto max-w-6xl px-4 pb-16 ${started || view === 'track' ? 'pt-6' : '-mt-16'}`}>
+        {view === 'track' ? (
+          <TrackView key={trackAck} initialAck={trackAck} />
+        ) : !started ? (
           <div className="mx-auto max-w-3xl">
             <ComplaintForm onSubmit={run} busy={busy} />
             <p className="mt-4 text-center text-xs text-slate-500">
@@ -119,7 +133,7 @@ export default function App() {
               {result?.draft && (
                 <FilingPanel analysis={result.analysis} evidence={result.evidence} complaint={result.complaint}
                   person={result.person || EMPTY_PERSON} anonymous={result.anonymous}
-                  onStatus={(s, note) => mark('filing', s, note)} />
+                  onStatus={(s, note) => mark('filing', s, note)} onTrack={openTrack} />
               )}
             </div>
             <aside className="order-1 lg:order-2">

@@ -12,3 +12,5 @@ DATA_DIR = BASE_DIR / "data"
 PORT = int(os.getenv("PORT", "8000"))
 # The Filing Agent's browser opens this portal (our demo portal, served by this same app).
 PORTAL_URL = os.getenv("PORTAL_URL", f"http://127.0.0.1:{PORT}/portal/")
+# How often the Tracking Agent re-checks every filed complaint in the background (0 = off)
+AUTO_TRACK_MINUTES = int(os.getenv("AUTO_TRACK_MINUTES", "60"))

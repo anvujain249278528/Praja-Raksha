@@ -146,7 +146,7 @@ def _run(job: dict, case: dict):
             browser.close()
 
 
-def start(case: dict) -> str:
+def start(case: dict, on_done=None) -> str:
     job_id = uuid.uuid4().hex[:12]
     job = {"id": job_id, "status": "running", "steps": [], "shots": [], "ack_no": None,
            "blocked_reason": None, "error": None, "started": time.time()}
@@ -155,6 +155,8 @@ def start(case: dict) -> str:
     def worker():
         try:
             _run(job, case)
+            if job["status"] == "done" and on_done:
+                on_done(job["ack_no"])
         except Exception as e:  # report any failure to the user instead of crashing
             job["status"] = "error"
             job["error"] = str(e)[:300]

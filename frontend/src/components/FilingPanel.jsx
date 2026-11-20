@@ -4,7 +4,7 @@ import { postJson } from '../api'
 
 const API = import.meta.env.VITE_API_URL || ''
 
-export default function FilingPanel({ analysis, evidence, complaint, person, anonymous, onStatus }) {
+export default function FilingPanel({ analysis, evidence, complaint, person, anonymous, onStatus, onTrack }) {
   const [confirmed, setConfirmed] = useState(false)
   const [job, setJob] = useState(null)
   const [extra, setExtra] = useState('')
@@ -109,7 +109,10 @@ export default function FilingPanel({ analysis, evidence, complaint, person, ano
             className="mt-3 inline-flex items-center gap-1 text-sm font-semibold text-emerald-800 underline">
             View receipt on the portal <ExternalLink size={14} />
           </a>
-          <p className="mt-2 text-xs text-emerald-700">Save this number. You will need it to track or escalate your complaint.</p>
+          <p className="mt-2 text-xs text-emerald-700">Save this number. The Tracking Agent will watch this complaint and escalate if police do not act.</p>
+          <button onClick={() => onTrack(job.ack_no)} className="mt-3 rounded-lg bg-emerald-700 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-800">
+            Track this complaint
+          </button>
         </div>
       )}
 
