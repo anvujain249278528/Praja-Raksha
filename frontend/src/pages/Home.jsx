@@ -1,5 +1,6 @@
 import { ArrowRight, Bot, Clock, Crosshair, ExternalLink, Loader2, Quote, FileSearch, FileText, Gavel, MapPin, Newspaper, Phone, Radar, Scale, ShieldCheck, Siren, Sparkles } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
+import Stars from '../components/Stars'
 import { navigate } from '../router'
 
 const API = import.meta.env.VITE_API_URL || ''
@@ -90,6 +91,14 @@ export default function Home() {
   const [place, setPlace] = useState('Karnataka')
   const [scope, setScope] = useState('local') // 'local' | 'india'
   const [locating, setLocating] = useState(false)
+  const [feedback, setFeedback] = useState(null)
+
+  useEffect(() => {
+    const load = () => fetch(`${API}/api/feedback/summary`).then((r) => r.json()).then(setFeedback).catch(() => {})
+    load()
+    window.addEventListener('feedback-added', load)
+    return () => window.removeEventListener('feedback-added', load)
+  }, [])
 
   useEffect(() => {
     const t = setInterval(() => setWord((w) => (w + 1) % WORDS.length), 2500)
@@ -291,6 +300,37 @@ export default function Home() {
             </ul>
           )}
         </div>
+      </section>
+
+      {/* Real user feedback about Praja Raksha */}
+      <section className="mx-auto max-w-6xl px-4 pt-12">
+        <div className="flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <h2 className="text-2xl font-extrabold text-slate-900">What users say</h2>
+            <p className="mt-1 text-slate-600">Real feedback from people who tried Praja Raksha, checked by our Moderation Agent.</p>
+          </div>
+          {feedback?.count > 0 && (
+            <p className="flex items-center gap-2 rounded-xl bg-white px-4 py-2 shadow-sm ring-1 ring-slate-200">
+              <span className="text-2xl font-extrabold text-slate-900">{feedback.average}</span><Stars value={feedback.average} />
+              <span className="text-sm text-slate-500">from {feedback.count} rating{feedback.count > 1 ? 's' : ''}</span>
+            </p>
+          )}
+        </div>
+        {feedback?.recent_praise?.length > 0 ? (
+          <ul className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {feedback.recent_praise.map((f, i) => (
+              <li key={i} className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
+                <Stars value={f.rating} size={14} />
+                <p className="mt-2 text-sm text-slate-700">"{f.text}"</p>
+                <p className="mt-2 text-xs text-slate-400">Praja Raksha user · {f.created_at.slice(0, 10)}</p>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="mt-6 rounded-2xl border-2 border-dashed border-slate-300 p-6 text-center text-slate-500">
+            No feedback yet. Tried Praja Raksha? Tap <b className="text-saffron">Feedback</b> at the bottom right and be the first.
+          </p>
+        )}
       </section>
 
       <section className="mx-auto max-w-6xl px-4 py-12">

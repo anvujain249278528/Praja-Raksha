@@ -230,3 +230,33 @@ def seed_sample_reviews():
             c.execute("INSERT INTO reviews (target_type, target_id, rating, text, case_category, created_at, sample) "
                       "VALUES (?, ?, ?, ?, ?, ?, 1)", (r.get("target_type", "lawyer"), r["target_id"], r["rating"],
                                                      r["text"], r["case_category"], r["created_at"]))
+
+
+# ---------- Feedback about Praja Raksha itself ----------
+FEEDBACK_SCHEMA = """
+CREATE TABLE IF NOT EXISTS feedback (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    rating INTEGER NOT NULL CHECK (rating BETWEEN 1 AND 5),
+    kind TEXT NOT NULL,              -- 'praise' | 'idea' | 'problem'
+    text TEXT NOT NULL,
+    page TEXT,
+    created_at TEXT NOT NULL
+);
+"""
+
+
+def add_feedback(rating: int, kind: str, text: str, page: str) -> dict:
+    now = datetime.now().isoformat(timespec="seconds")
+    with conn() as c:
+        c.executescript(FEEDBACK_SCHEMA)
+        cur = c.execute("INSERT INTO feedback (rating, kind, text, page, created_at) VALUES (?,?,?,?,?)", (rating, kind, text, page, now))
+    return {"id": cur.lastrowid, "created_at": now}
+
+
+def feedback_summary() -> dict:
+    with conn() as c:
+        c.executescript(FEEDBACK_SCHEMA)
+        avg, n = c.execute("SELECT AVG(rating), COUNT(*) FROM feedback").fetchone()
+        recent = [dict(r) for r in c.execute("SELECT rating, kind, text, created_at FROM feedback "
+                                             "WHERE kind = 'praise' AND rating >= 4 ORDER BY id DESC LIMIT 6")]
+    return {"average": round(avg, 1) if avg else None, "count": n, "recent_praise": recent}

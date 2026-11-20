@@ -206,6 +206,26 @@ def post_review(r: ReviewRequest):
     return db.add_review(r.target_type, r.target_id, r.rating, r.text.strip(), r.case_category)
 
 
+class FeedbackRequest(BaseModel):
+    rating: int = Field(ge=1, le=5)
+    kind: Literal["praise", "idea", "problem"] = "praise"
+    text: str = Field(min_length=5, max_length=1500)
+    page: str = Field(default="", max_length=40)
+
+
+@app.post("/api/feedback")
+def post_feedback(f: FeedbackRequest):
+    verdict = moderation_agent.check(f.text, f.rating)
+    if not verdict.allowed:
+        raise HTTPException(422, f"Feedback not saved: {verdict.reason}")
+    return db.add_feedback(f.rating, f.kind, f.text.strip(), f.page)
+
+
+@app.get("/api/feedback/summary")
+def feedback_summary():
+    return db.feedback_summary()
+
+
 # Serve the built React app (frontend/dist) so the whole product runs from one URL.
 FRONTEND_DIST = Path(__file__).resolve().parents[2] / "frontend" / "dist"
 if FRONTEND_DIST.exists():

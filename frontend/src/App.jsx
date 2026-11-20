@@ -1,5 +1,6 @@
 import { Menu, Phone, ShieldCheck, X } from 'lucide-react'
 import { useState } from 'react'
+import Feedback from './components/Feedback'
 import TrackView from './components/TrackView'
 import ComplaintPage from './pages/ComplaintPage'
 import Helplines from './pages/Helplines'
@@ -54,6 +55,8 @@ export default function App() {
         {path === '/nearby' && <Nearby key={`${params.tab}-${params.category}`} params={params} />}
         {path === '/track' && <div className="px-4 py-8"><TrackView key={params.ack || ''} initialAck={params.ack || ''} /></div>}
       </main>
+
+      <Feedback page={path} />
 
       <footer className="border-t border-slate-200 bg-white">
         <div className="mx-auto flex max-w-6xl flex-col gap-2 px-4 py-6 text-xs text-slate-500 sm:flex-row sm:justify-between">
