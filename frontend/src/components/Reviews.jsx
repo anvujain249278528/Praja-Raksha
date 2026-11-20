@@ -68,7 +68,11 @@ export default function Reviews({ target, type, caseCategory, onClose, onAdded }
             <ul className="space-y-4">
               {list.map((r) => (
                 <li key={r.id} className="border-b border-slate-100 pb-4">
-                  <div className="flex items-center justify-between"><Stars value={r.rating} size={14} /><span className="text-xs text-slate-400">{r.created_at.slice(0, 10)}</span></div>
+                  <div className="flex items-center justify-between">
+                    <span className="flex items-center gap-2"><Stars value={r.rating} size={14} />
+                      {r.sample ? <span className="rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-semibold uppercase text-slate-500">Sample (demo)</span> : null}</span>
+                    <span className="text-xs text-slate-400">{r.created_at.slice(0, 10)}</span>
+                  </div>
                   <p className="mt-1 text-sm text-slate-700">{r.text}</p>
                   {r.case_category && <p className="mt-1 text-xs text-slate-400">Case type: {r.case_category.replaceAll('_', ' ')}</p>}
                 </li>

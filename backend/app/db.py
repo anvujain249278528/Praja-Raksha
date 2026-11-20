@@ -47,6 +47,10 @@ def init():
         c.executescript(CASES_SCHEMA)
         c.executescript(DEMO_CLOCK_SCHEMA)
         c.executescript(REVIEWS_SCHEMA)
+        cols = [r[1] for r in c.execute("PRAGMA table_info(reviews)")]
+        if "sample" not in cols:  # upgrade databases created before this column existed
+            c.execute("ALTER TABLE reviews ADD COLUMN sample INTEGER NOT NULL DEFAULT 0")
+    seed_sample_reviews()
 
 
 def new_ack_no(district: str) -> str:
@@ -174,7 +178,8 @@ CREATE TABLE IF NOT EXISTS reviews (
     rating INTEGER NOT NULL CHECK (rating BETWEEN 1 AND 5),
     text TEXT NOT NULL,
     case_category TEXT,
-    created_at TEXT NOT NULL
+    created_at TEXT NOT NULL,
+    sample INTEGER NOT NULL DEFAULT 0   -- 1 = clearly-labelled sample review on a demo listing
 );
 """
 
@@ -189,16 +194,16 @@ def add_review(target_type: str, target_id: str, rating: int, text: str, case_ca
 
 def reviews_for(target_type: str, target_id: str) -> list[dict]:
     with conn() as c:
-        rows = c.execute("SELECT id, rating, text, case_category, created_at FROM reviews "
+        rows = c.execute("SELECT id, rating, text, case_category, created_at, sample FROM reviews "
                          "WHERE target_type = ? AND target_id = ? ORDER BY id DESC LIMIT 50", (target_type, target_id))
         return [dict(r) for r in rows]
 
 
 def rating_summary(target_type: str, target_id: str) -> dict:
     with conn() as c:
-        avg, n = c.execute("SELECT AVG(rating), COUNT(*) FROM reviews WHERE target_type = ? AND target_id = ?",
-                           (target_type, target_id)).fetchone()
-    return {"rating": round(avg, 1) if avg else None, "review_count": n}
+        avg, n, samples = c.execute("SELECT AVG(rating), COUNT(*), SUM(sample) FROM reviews WHERE target_type = ? AND target_id = ?",
+                                    (target_type, target_id)).fetchone()
+    return {"rating": round(avg, 1) if avg else None, "review_count": n, "has_sample_reviews": bool(samples)}
 
 
 def platform_stats() -> dict:
@@ -209,6 +214,19 @@ def platform_stats() -> dict:
         escalated = c.execute("SELECT COUNT(*) FROM cases WHERE escalation_level > 0").fetchone()[0]
         by_cat = [dict(r) for r in c.execute("SELECT category, COUNT(*) AS n FROM complaints GROUP BY category ORDER BY n DESC")]
         by_district = [dict(r) for r in c.execute("SELECT district, COUNT(*) AS n FROM complaints GROUP BY district ORDER BY n DESC")]
-        reviews = c.execute("SELECT COUNT(*) FROM reviews").fetchone()[0]
+        reviews = c.execute("SELECT COUNT(*) FROM reviews WHERE sample = 0").fetchone()[0]
     return {"complaints_filed": total, "anonymous": anon, "fir_registered": fir, "escalations": escalated,
             "reviews": reviews, "by_category": by_cat, "by_district": by_district}
+
+
+def seed_sample_reviews():
+    """Add clearly-labelled SAMPLE reviews to DEMO lawyer listings only (never to real police stations)."""
+    path = DATA_DIR / "sample_reviews.json"
+    if not path.exists():
+        return
+    with conn() as c:
+        if c.execute("SELECT COUNT(*) FROM reviews WHERE sample = 1").fetchone()[0]:
+            return
+        for r in json.loads(path.read_text(encoding="utf-8"))["reviews"]:
+            c.execute("INSERT INTO reviews (target_type, target_id, rating, text, case_category, created_at, sample) "
+                      "VALUES ('lawyer', ?, ?, ?, ?, ?, 1)", (r["target_id"], r["rating"], r["text"], r["case_category"], r["created_at"]))

@@ -102,3 +102,11 @@ def lawyers(lat: float, lon: float, category: str = "") -> list[dict]:
     # Nearby free legal aid first, then nearby lawyers who fit the case, then everyone by distance
     near = lambda l: l["distance_km"] <= 60
     return sorted(out, key=lambda l: (not (l.get("free_legal_aid") and near(l)), not (l["matches_case"] and near(l)), l["distance_km"]))
+
+
+def reverse_geocode(lat: float, lon: float) -> dict:
+    url = "https://nominatim.openstreetmap.org/reverse?" + urllib.parse.urlencode(
+        {"lat": lat, "lon": lon, "format": "jsonv2", "zoom": 10, "accept-language": "en"})
+    a = json.loads(urllib.request.urlopen(urllib.request.Request(url, headers=UA), timeout=10).read()).get("address", {})
+    city = a.get("city") or a.get("town") or a.get("state_district") or a.get("county") or a.get("state") or "India"
+    return {"place": city.replace(" City", "").replace(" district", "").strip(), "state": a.get("state", "")}

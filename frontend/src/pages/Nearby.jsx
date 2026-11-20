@@ -163,7 +163,7 @@ export default function Nearby({ params }) {
                     )}
                     <button onClick={(e) => { e.stopPropagation(); setReviewing(p) }} className="mt-2 flex items-center gap-2 text-sm text-slate-600 hover:text-brand-700">
                       <Stars value={p.rating} size={14} />
-                      <span className="underline-offset-2 hover:underline">{p.rating ? `${p.rating} (${p.review_count})` : 'No reviews yet'} · Reviews</span>
+                      <span className="underline-offset-2 hover:underline">{p.rating ? `${p.rating} (${p.review_count}${p.has_sample_reviews ? ', incl. sample' : ''})` : 'No reviews yet'} · Reviews</span>
                     </button>
                     <div className="mt-3 flex flex-wrap gap-2">
                       {p.phone && <a onClick={(e) => e.stopPropagation()} href={`tel:${p.phone}`} className="inline-flex items-center gap-1 rounded-lg bg-brand-50 px-3 py-1.5 text-xs font-semibold text-brand-700"><Phone size={13} />{p.phone}</a>}

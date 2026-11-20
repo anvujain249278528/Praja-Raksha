@@ -1,36 +1,47 @@
-"""Latest crime & safety news from Google News RSS (public feed), cached to stay fast and polite."""
+"""Latest crime & safety news from Google News RSS (public feed), by place, cached to stay fast and polite."""
 import time
 import urllib.parse
 import urllib.request
 import xml.etree.ElementTree as ET
+from datetime import datetime, timedelta, timezone
 from email.utils import parsedate_to_datetime
 
-QUERY = ('("cyber fraud" OR "digital arrest" OR sextortion OR "online scam" OR stalking OR "dowry harassment" '
-         'OR "sexual harassment" OR "cyber crime police") (Karnataka OR Bengaluru OR Mysuru)')
-FEED = "https://news.google.com/rss/search?" + urllib.parse.urlencode(
-    {"q": QUERY + " when:7d", "hl": "en-IN", "gl": "IN", "ceid": "IN:en"})
+TOPICS = ('("cyber fraud" OR "digital arrest" OR sextortion OR "online scam" OR stalking OR "dowry harassment" '
+          'OR "sexual harassment" OR "cyber crime" OR "chain snatching" OR robbery OR "cyber police")')
 CACHE_SECONDS = 30 * 60
-_cache = {"at": 0.0, "items": []}
+MAX_AGE_DAYS = 30
+_cache: dict[str, tuple[float, list]] = {}
 
 
-def latest(limit: int = 8) -> list[dict]:
-    if time.time() - _cache["at"] < CACHE_SECONDS and _cache["items"]:
-        return _cache["items"][:limit]
+def _feed(place: str) -> str:
+    return "https://news.google.com/rss/search?" + urllib.parse.urlencode(
+        {"q": f"{TOPICS} {place} when:30d", "hl": "en-IN", "gl": "IN", "ceid": "IN:en"})
+
+
+def latest(place: str = "Karnataka", limit: int = 8) -> list[dict]:
+    place = (place or "Karnataka").strip()[:60]
+    hit = _cache.get(place.lower())
+    if hit and time.time() - hit[0] < CACHE_SECONDS:
+        return hit[1][:limit]
+    items = []
     try:
-        req = urllib.request.Request(FEED, headers={"User-Agent": "Mozilla/5.0 (PrajaRaksha news reader)"})
+        req = urllib.request.Request(_feed(f'"{place}"'), headers={"User-Agent": "Mozilla/5.0 (PrajaRaksha news reader)"})
         root = ET.fromstring(urllib.request.urlopen(req, timeout=10).read())
-        items = []
         for it in root.iter("item"):
             title = it.findtext("title", "")
             source = it.findtext("source", "")
             if source and title.endswith(" - " + source):
                 title = title[: -len(source) - 3]
             pub = it.findtext("pubDate")
-            items.append({
-                "title": title, "link": it.findtext("link", ""), "source": source,
-                "published": parsedate_to_datetime(pub).isoformat() if pub else None,
-            })
-        _cache.update(at=time.time(), items=items)
+            items.append({"title": title, "link": it.findtext("link", ""), "source": source,
+                          "published": parsedate_to_datetime(pub).isoformat() if pub else None})
+        items.sort(key=lambda x: x["published"] or "", reverse=True)
+        # Google sometimes ignores "when:7d"; keep only the last MAX_AGE_DAYS ourselves.
+        cutoff = (datetime.now(timezone.utc) - timedelta(days=MAX_AGE_DAYS)).isoformat()
+        items = [i for i in items if (i["published"] or "") >= cutoff]
+        _cache[place.lower()] = (time.time(), items)
     except Exception as e:  # news is nice-to-have; never break the home page
-        print(f"[news] fetch failed: {e}")
-    return _cache["items"][:limit]
+        print(f"[news] fetch failed for {place}: {e}")
+        if hit:
+            return hit[1][:limit]
+    return items[:limit]

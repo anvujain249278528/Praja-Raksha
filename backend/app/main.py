@@ -154,8 +154,17 @@ def filing_screenshot(job_id: str, n: int):
 
 # ---------- Website: news, stats, nearby help, reviews ----------
 @app.get("/api/news")
-def get_news():
-    return news.latest()
+def get_news(place: str = "Karnataka"):
+    return news.latest(place)
+
+
+@app.get("/api/geo/place")
+def geo_place(lat: float, lon: float):
+    """City/district name for the user's coordinates (OpenStreetMap Nominatim)."""
+    try:
+        return places.reverse_geocode(lat, lon)
+    except Exception:
+        raise HTTPException(503, "Could not find your city right now.")
 
 
 @app.get("/api/stats")
