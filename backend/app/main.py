@@ -236,4 +236,6 @@ if FRONTEND_DIST.exists():
         file = FRONTEND_DIST / path
         if path and file.is_file() and FRONTEND_DIST in file.resolve().parents:
             return FileResponse(file)
-        return FileResponse(FRONTEND_DIST / "index.html")
+        # index.html must never be cached, or browsers keep showing an old version after an update.
+        # (JS/CSS files have content hashes in their names, so they can be cached safely.)
+        return FileResponse(FRONTEND_DIST / "index.html", headers={"Cache-Control": "no-cache, no-store, must-revalidate"})
