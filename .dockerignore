@@ -1,0 +1,10 @@
+.git
+**/node_modules
+**/.venv
+**/__pycache__
+frontend/dist
+backend/.env
+backend/app/data/*.db
+samples
+*.md
+!README.md

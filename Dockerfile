@@ -1,0 +1,30 @@
+# ---------- Stage 1: build the React frontend ----------
+FROM node:22-slim AS frontend
+WORKDIR /build
+COPY frontend/package.json frontend/package-lock.json ./
+RUN npm ci
+COPY frontend/ ./
+RUN npm run build
+
+# ---------- Stage 2: Python backend + headless Chromium for the browser agents ----------
+FROM python:3.12-slim
+ENV PYTHONUNBUFFERED=1 \
+    PLAYWRIGHT_BROWSERS_PATH=/ms-playwright \
+    PORT=7860 \
+    AUTO_TRACK_MINUTES=60
+
+WORKDIR /app
+COPY backend/requirements.txt backend/requirements.txt
+RUN pip install --no-cache-dir -r backend/requirements.txt \
+ && python -m playwright install --with-deps chromium
+
+COPY backend/ backend/
+COPY --from=frontend /build/dist frontend/dist
+
+# Hugging Face Spaces runs the container as user 1000; it must be able to write the SQLite database.
+RUN useradd -m -u 1000 user && chown -R user:user /app
+USER user
+
+WORKDIR /app/backend
+EXPOSE 7860
+CMD ["sh", "-c", "uvicorn app.main:app --host 0.0.0.0 --port ${PORT}"]
