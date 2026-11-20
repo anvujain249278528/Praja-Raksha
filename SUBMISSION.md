@@ -41,8 +41,9 @@ without consequences.
 
 ## Solution description
 
-Praja Raksha is an AI legal first-aid platform where a citizen describes their problem once, by voice or text in Kannada, Hindi or
-English, and six AI agents do the work for them:
+Praja Raksha is an AI legal first-aid platform where a citizen describes their problem once, by voice or text in any of 12 Indian
+languages (Kannada, Hindi, English, Tamil, Telugu, Malayalam, Marathi, Bengali, Gujarati, Punjabi, Odia, Urdu), with answers
+read aloud by voice-over, and six AI agents do the work for them:
 
 1. **Evidence Agent:** reads uploaded screenshots and call recordings (Gemini multimodal), extracts threats, demands, phone
    numbers, usernames and UPI IDs, builds a timeline, and records a SHA-256 fingerprint of every file.

@@ -1,9 +1,10 @@
-import { ChevronDown, EyeOff, FileAudio, ImageIcon, Mic, Send, Square, Upload, User, X } from 'lucide-react'
+import { ChevronDown, EyeOff, FileAudio, ImageIcon, Languages, Mic, Send, Square, Upload, User, X } from 'lucide-react'
 import { useRef, useState } from 'react'
 import { LANGUAGES, useVoiceInput, voiceSupported } from '../speech'
 
 const EXAMPLES = [
   'ನನ್ನ ಮಾಜಿ ಬಾಯ್‌ಫ್ರೆಂಡ್ 50,000 ರೂಪಾಯಿ ಕೊಡದಿದ್ದರೆ ನನ್ನ ಖಾಸಗಿ ಫೋಟೋಗಳನ್ನು ಇನ್‌ಸ್ಟಾಗ್ರಾಮ್‌ನಲ್ಲಿ ಹಾಕುತ್ತೇನೆ ಎಂದು ಬೆದರಿಸುತ್ತಿದ್ದಾನೆ.',
+  'யாரோ என் இன்ஸ்டாகிராம் கணக்கை ஹேக் செய்து, என் பெயரில் என் நண்பர்களுக்கு ஆபாசமான செய்திகளை அனுப்புகிறார்கள்.',
   'मेरे पति और सास दहेज के लिए रोज़ मारते-पीटते हैं और घर से निकालने की धमकी देते हैं।',
   'I got a video call from someone in police uniform saying I am under "digital arrest" and I paid Rs 1.2 lakh to their account.',
 ]
@@ -28,7 +29,7 @@ export default function ComplaintForm({ onSubmit, busy }) {
   function submit(e) {
     e.preventDefault()
     if (voice.listening) voice.stop()
-    onSubmit({ text: text.trim(), files, person, anonymous })
+    onSubmit({ text: text.trim(), files, person, anonymous, language: LANGUAGES.find((l) => l.code === lang).name })
   }
 
   const canSubmit = text.trim().length >= 10 && !busy
@@ -37,16 +38,16 @@ export default function ComplaintForm({ onSubmit, busy }) {
     <form onSubmit={submit} className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200 sm:p-7">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h2 className="text-lg font-bold text-slate-900">Tell us what happened</h2>
-        <div className="flex rounded-lg bg-slate-100 p-1" role="radiogroup" aria-label="Voice language">
-          {LANGUAGES.map((l) => (
-            <button key={l.code} type="button" onClick={() => setLang(l.code)}
-              className={`rounded-md px-3 py-1 text-sm font-medium transition ${lang === l.code ? 'bg-white text-brand-700 shadow' : 'text-slate-500 hover:text-slate-800'}`}>
-              {l.label}
-            </button>
-          ))}
-        </div>
+        <label className="flex items-center gap-2 text-sm">
+          <Languages size={18} className="text-brand-700" />
+          <span className="sr-only">Your language</span>
+          <select value={lang} onChange={(e) => setLang(e.target.value)}
+            className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 font-medium text-slate-800 outline-none focus:border-brand-600">
+            {LANGUAGES.map((l) => <option key={l.code} value={l.code}>{l.label}{l.label !== l.name ? ` · ${l.name}` : ''}</option>)}
+          </select>
+        </label>
       </div>
-      <p className="mt-1 text-sm text-slate-500">Speak or type in Kannada, Hindi or English. Your words stay private.</p>
+      <p className="mt-1 text-sm text-slate-500">Speak or type in 12 Indian languages. We answer in the language you choose, and can read it aloud.</p>
 
       <div className="relative mt-4">
         <textarea value={text} onChange={(e) => setText(e.target.value)} rows={5}
@@ -61,6 +62,7 @@ export default function ComplaintForm({ onSubmit, busy }) {
         )}
       </div>
       {voice.listening && <p className="mt-1 text-sm font-medium text-red-600">Listening... speak now</p>}
+      {voice.error && <p className="mt-1 text-sm text-amber-700">{voice.error}</p>}
 
       <div className="mt-2 flex flex-wrap gap-2">
         <span className="text-xs text-slate-400">Try:</span>

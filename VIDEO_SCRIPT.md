@@ -20,7 +20,7 @@
 | 1:35–2:10 | FIR draft → tick consent → File my complaint → agent's browser filling the portal → acknowledgement number | "The Drafting Agent wrote her FIR complaint as a PDF. Now the Filing Agent opens the complaint portal in a real browser, reads each page, fills it, fixes any errors, and brings back the acknowledgement number, all on its own. For safety we use a demo portal that works like the government one." |
 | 2:10–2:30 | Track this complaint → Demo: "15 days pass" → SP letter appears | "If police don't act within the 14-day legal window, the Tracking Agent escalates automatically and writes her letter to the Superintendent of Police under BNSS 173(4)." |
 | 2:30–2:45 | Police & lawyers map: Cyber Crime Police Station ranked first, reviews, free legal aid | "Prefer to go in person? Praja Raksha shows the nearest police stations, the cyber crime station first for her case, free legal aid, and lawyers, with citizen reviews checked by our Moderation Agent." |
-| 2:45–3:00 | Back to the home hero | "Praja Raksha: speak your problem, know your rights, get it filed. Six AI agents, three languages, built so that no victim has to give up. Thank you." |
+| 2:45–3:00 | Back to the home hero | "Praja Raksha: speak your problem, know your rights, get it filed. Six AI agents, twelve Indian languages, built so that no victim has to give up. Thank you." |
 
 ## After recording
 - Upload to YouTube as **Unlisted** (or Google Drive with "Anyone with the link can view").

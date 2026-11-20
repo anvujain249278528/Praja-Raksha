@@ -9,7 +9,7 @@ from typing import Literal
 from pydantic import BaseModel, Field
 
 from . import db
-from . import news, places
+from . import news, places, tts
 from .agents import drafting_agent, evidence_agent, filing_agent, legal_agent, moderation_agent, tracking_agent
 from .config import AUTO_TRACK_MINUTES
 from .portal.routes import router as portal_router
@@ -37,13 +37,14 @@ def health():
 class AnalyzeRequest(BaseModel):
     complaint: str
     evidence_notes: str = ""
+    language: str = ""  # language the user chose for answers, e.g. "Tamil"
 
 
 @app.post("/api/analyze")
 def analyze(req: AnalyzeRequest):
     if len(req.complaint.strip()) < 10:
         raise HTTPException(400, "Please describe the problem in a little more detail.")
-    return _run(legal_agent.analyze, req.complaint, req.evidence_notes)
+    return _run(legal_agent.analyze, req.complaint, req.evidence_notes, req.language)
 
 
 @app.post("/api/evidence")
@@ -150,6 +151,23 @@ def filing_screenshot(job_id: str, n: int):
     if not job or not 0 <= n < len(job["shots"]):
         raise HTTPException(404, "No such screenshot")
     return Response(job["shots"][n], media_type="image/png")
+
+
+class TtsRequest(BaseModel):
+    text: str = Field(min_length=1, max_length=4000)
+    lang: str = Field(pattern=r"^[a-z]{2}-IN$")
+
+
+@app.post("/api/tts")
+def text_to_speech(req: TtsRequest):
+    """Voice-over in Indian languages. 404 when we have no server voice (frontend then uses the device voice)."""
+    try:
+        audio = tts.synthesize(req.text, req.lang)
+    except Exception as e:
+        raise HTTPException(503, f"Voice service unavailable: {str(e)[:80]}")
+    if audio is None:
+        raise HTTPException(404, "No server voice for this language")
+    return Response(audio, media_type="audio/mpeg", headers={"Cache-Control": "private, max-age=3600"})
 
 
 # ---------- Website: news, stats, nearby help, reviews ----------

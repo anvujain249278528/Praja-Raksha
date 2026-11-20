@@ -27,10 +27,10 @@ class LegalAnalysis(BaseModel):
     ]
     severity: Literal["low", "medium", "high", "emergency"]
     summary: str = Field(description="2-3 line neutral summary of the incident in English")
-    summary_local: str = Field(description="Same summary in the user's language")
+    summary_local: str = Field(description="Same summary in the ANSWER LANGUAGE")
     sections: list[MatchedSection]
     actions: list[LegalAction] = Field(description="Ordered legal actions the user can take")
-    actions_local: list[str] = Field(description="The same actions, one line each, in the user's language")
+    actions_local: list[str] = Field(description="The same actions, one line each, in the ANSWER LANGUAGE")
     missing_info: list[str] = Field(description="Important facts still missing (dates, place, accused identity)")
 
 
@@ -53,7 +53,7 @@ KNOWLEDGE BASE (id | law | title | summary):
 """
 
 
-def analyze(complaint: str, evidence_notes: str = "") -> dict:
+def analyze(complaint: str, evidence_notes: str = "", language: str = "") -> dict:
     """Run the agent and return a validated result enriched with full section details."""
     user_msg = f"COMPLAINT:\n{complaint}"
     if evidence_notes:
@@ -69,7 +69,43 @@ def analyze(complaint: str, evidence_notes: str = "") -> dict:
         ),
     )
     result: LegalAnalysis = response.parsed
+    if language and not _in_script(result.summary_local, language):
+        _translate(result, language)  # some fallback models ignore the language instruction
     return _ground(result)
+
+
+# Unicode blocks of each language's script, used to verify the answer is really in that language
+SCRIPTS = {
+    "hindi": (0x0900, 0x097F), "marathi": (0x0900, 0x097F), "bengali": (0x0980, 0x09FF), "punjabi": (0x0A00, 0x0A7F),
+    "gujarati": (0x0A80, 0x0AFF), "odia": (0x0B00, 0x0B7F), "tamil": (0x0B80, 0x0BFF), "telugu": (0x0C00, 0x0C7F),
+    "kannada": (0x0C80, 0x0CFF), "malayalam": (0x0D00, 0x0D7F), "urdu": (0x0600, 0x06FF),
+}
+
+
+def _in_script(text: str, language: str) -> bool:
+    block = SCRIPTS.get(language.lower())
+    if not block:  # English or unknown: nothing to check
+        return True
+    letters = [ch for ch in text if ch.isalpha()]
+    inside = sum(1 for ch in letters if block[0] <= ord(ch) <= block[1])
+    return bool(letters) and inside / len(letters) > 0.5
+
+
+class _Localised(BaseModel):
+    summary_local: str
+    actions_local: list[str]
+
+
+def _translate(result: LegalAnalysis, language: str):
+    prompt = (f"Translate into simple, everyday {language} (in {language} script) for a citizen with little education. "
+              "Keep section numbers, phone numbers and website names unchanged.\n\n"
+              f"SUMMARY: {result.summary}\n\nACTIONS:\n" +
+              "\n".join(f"- {a.action}: {a.detail}" for a in result.actions))
+    resp = generate(contents=prompt, config=types.GenerateContentConfig(
+        response_mime_type="application/json", response_schema=_Localised, temperature=0.2))
+    t: _Localised = resp.parsed
+    result.summary_local, result.actions_local = t.summary_local, t.actions_local
+    result.detected_language = language
 
 
 def _ground(result: LegalAnalysis) -> dict:

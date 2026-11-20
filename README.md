@@ -39,7 +39,7 @@ The scale is large. NCRB's *Crime in India 2022* report records 4,45,256 crimes 
 
 ## The solution
 
-A citizen describes the problem once, by **voice or text in Kannada, Hindi or English**, optionally with screenshots or recordings.
+A citizen describes the problem once, by **voice or text in 12 Indian languages** (Kannada, Hindi, English, Tamil, Telugu, Malayalam, Marathi, Bengali, Gujarati, Punjabi, Odia, Urdu), optionally with screenshots or recordings.
 Six AI agents then do the work:
 
 | # | Agent | What it does |
@@ -57,12 +57,13 @@ Plus a full citizen website:
 - **Police & lawyers near you:** a map of real police stations from OpenStreetMap, ranked for the case (for example, the Cyber Crime Police Station first for cyber cases), free legal aid (DLSA) and lawyers matched to the case type, with **citizen ratings and reviews**.
 - **Public or anonymous complaints:** anonymous mode shares only the district, never the identity.
 - **Track:** status, the agent's decision, and auto-drafted escalation letters.
+- **12 languages with voice-over:** answers are written in the chosen language's own script (verified by code, with automatic translation if a model replies in the wrong language) and read aloud.
 - **Feedback** on every page.
 
 ## How it works
 
 ```
- Citizen (voice / text / screenshots, Kannada · Hindi · English)
+ Citizen (voice / text / screenshots, 12 Indian languages)
         │
         ▼
  ┌──────────────┐   ┌────────────────────┐   ┌────────────────┐   ┌────────────────┐
@@ -84,7 +85,8 @@ remembers failing models for 5 minutes, and uses short timeouts, so a busy AI mo
 
 | Layer | Technology |
 |---|---|
-| Frontend | React 19, Vite, Tailwind CSS, Leaflet (maps), Web Speech API (voice in/out) |
+| Frontend | React 19, Vite, Tailwind CSS, Leaflet (maps), Web Speech API (voice input, device voices) |
+| Voice-over | Neural voices for 10 Indian languages via `edge-tts` (prototype; production would use Bhashini or Google Cloud TTS), device voices as fallback |
 | Backend | Python, FastAPI, SQLite |
 | AI | Google Gemini (structured JSON output, multimodal image/audio) |
 | Browser automation | Playwright (Chromium) |
@@ -165,6 +167,7 @@ samples/         sample WhatsApp threat screenshot and generated FIR PDF
 ## Credits
 
 - **AI model:** Google Gemini (via the `google-genai` SDK)
+- **Voice-over:** edge-tts (Microsoft Edge neural voices, unofficial endpoint, used for this prototype only)
 - **Libraries:** FastAPI, Uvicorn, Playwright, ReportLab, React, Vite, Tailwind CSS, Leaflet / React-Leaflet, Lucide icons, Pydantic
 - **Data:** OpenStreetMap contributors (map tiles, Nominatim, Overpass), Google News RSS, NCRB *Crime in India 2022*,
   India Code (bare acts), government helpline directories

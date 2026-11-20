@@ -28,7 +28,7 @@ const SCENARIOS = [
 
 const AGENTS = [
   { icon: FileSearch, name: 'Evidence Agent', text: 'Reads screenshots and call recordings, builds a timeline with tamper-proof fingerprints.' },
-  { icon: Scale, name: 'Legal Analysis Agent', text: 'Understands Kannada, Hindi and English and finds the exact laws, only from a verified legal database.' },
+  { icon: Scale, name: 'Legal Analysis Agent', text: 'Understands 12 Indian languages and finds the exact laws, only from a verified legal database.' },
   { icon: FileText, name: 'Drafting Agent', text: 'Writes your FIR complaint, SP letter or Magistrate application as a ready-to-sign PDF.' },
   { icon: Bot, name: 'Filing Agent', text: 'Opens the complaint portal in a browser, fills every page and brings back your acknowledgement number.' },
   { icon: Radar, name: 'Tracking Agent', text: 'Watches your complaint. If police do not act within the legal time, it escalates for you.' },
@@ -63,7 +63,7 @@ function HeroScene() {
   const chips = [
     { text: 'BNS Section 78: Stalking', cls: 'left-0 top-6', delay: '0s' },
     { text: '✓ FIR filed: KA-MYS-…', cls: 'right-0 top-16', delay: '1.2s' },
-    { text: 'ಕನ್ನಡ · हिन्दी · English', cls: 'left-4 bottom-10', delay: '2.1s' },
+    { text: 'ಕನ್ನಡ · தமிழ் · తెలుగు · हिन्दी', cls: 'left-4 bottom-10', delay: '2.1s' },
     { text: 'Cyber helpline 1930', cls: 'right-2 bottom-4', delay: '.6s' },
   ]
   return (
@@ -142,7 +142,7 @@ export default function Home() {
         <div className="relative mx-auto grid max-w-6xl items-center gap-10 px-4 py-14 sm:py-20 lg:grid-cols-[1.2fr_1fr]">
           <div className="rise">
             <p className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-semibold ring-1 ring-white/20">
-              <span className="size-2 animate-pulse rounded-full bg-emerald-400" /> 6 AI agents · Kannada · हिन्दी · English
+              <span className="size-2 animate-pulse rounded-full bg-emerald-400" /> 6 AI agents · 12 Indian languages · Voice
             </p>
             <h1 className="mt-5 text-4xl font-extrabold leading-tight sm:text-6xl">
               Facing <span key={word} className="word-cycle inline-block text-saffron">{WORDS[word]}</span>

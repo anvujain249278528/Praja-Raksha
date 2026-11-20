@@ -21,7 +21,7 @@ export default function ComplaintPage() {
   }
 
   // The agent pipeline: Evidence -> Legal Analysis -> Drafting. Each agent's output feeds the next.
-  async function run({ text, files, person, anonymous }) {
+  async function run({ text, files, person, anonymous, language }) {
     setBusy(true); setError(''); setResult(null); setStatus({}); setNotes({})
     window.scrollTo(0, 0)
     let current = 'evidence'
@@ -37,9 +37,9 @@ export default function ComplaintPage() {
 
       current = 'legal'
       mark('legal', 'running', 'Matching your facts against the legal database...')
-      const analysis = await postJson('/analyze', { complaint: text, evidence_notes: evidence?.notes_for_legal_agent || '' })
+      const analysis = await postJson('/analyze', { complaint: text, evidence_notes: evidence?.notes_for_legal_agent || '', language })
       mark('legal', 'done', `${analysis.sections.length} sections found, ${analysis.severity} severity`)
-      setResult({ analysis, evidence, complaint: text, person, anonymous, draft: null })
+      setResult({ analysis, evidence, complaint: text, person, anonymous, language, draft: null })
 
       current = 'draft'
       mark('draft', 'running', 'Writing your FIR complaint...')
@@ -49,7 +49,7 @@ export default function ComplaintPage() {
         evidence_summary: evidence?.overall_summary || '',
       })
       mark('draft', 'done', 'FIR complaint ready to download')
-      setResult({ analysis, evidence, complaint: text, person, anonymous, draft })
+      setResult({ analysis, evidence, complaint: text, person, anonymous, language, draft })
     } catch (e) {
       mark(current, 'error', e.message)
       setError(e.message)
@@ -69,7 +69,7 @@ export default function ComplaintPage() {
               Speak your problem. <span className="text-saffron">Know your rights.</span> Get it filed.
             </h1>
             <p className="mt-4 max-w-2xl text-brand-100 sm:text-lg">
-              Tell us in Kannada, Hindi or English. Our AI agents find the laws that protect you, organise your evidence,
+              Tell us in your language: Kannada, Hindi, Tamil, Telugu and 8 more. Our AI agents find the laws that protect you, organise your evidence,
               write your police complaint and can file it for you.
             </p>
           </div>
@@ -99,7 +99,7 @@ export default function ComplaintPage() {
           </div>
         )}
         {!result && busy && <div className="space-y-4">{[1, 2, 3].map((i) => <div key={i} className="h-40 animate-pulse rounded-2xl bg-slate-200" />)}</div>}
-        {result && <Results analysis={result.analysis} evidence={result.evidence} />}
+        {result && <Results analysis={result.analysis} evidence={result.evidence} language={result.language} />}
 
         {result && (
           <section className="grid gap-3 sm:grid-cols-2">
