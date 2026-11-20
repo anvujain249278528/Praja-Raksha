@@ -1,0 +1,21 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", "Noto Sans Kannada", "Noto Sans Devanagari", system-ui, sans-serif;
+  --color-brand-50: #eff4ff;
+  --color-brand-100: #dbe6fe;
+  --color-brand-600: #2547b8;
+  --color-brand-700: #1e3a8a;
+  --color-brand-900: #142559;
+  --color-saffron: #f59e0b;
+}
+
+body {
+  @apply bg-slate-50 text-slate-800 antialiased;
+}
+
+@keyframes pulse-ring {
+  0% { box-shadow: 0 0 0 0 rgb(239 68 68 / 0.5); }
+  100% { box-shadow: 0 0 0 14px rgb(239 68 68 / 0); }
+}
+.recording { animation: pulse-ring 1.2s infinite; }

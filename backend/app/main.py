@@ -1,6 +1,9 @@
+from pathlib import Path
+
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import Response
+from fastapi.responses import FileResponse, Response
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 from .agents import drafting_agent, evidence_agent, legal_agent
@@ -77,3 +80,16 @@ def pdf(req: PdfRequest):
     data = drafting_agent.to_pdf(req.text, req.title)
     return Response(data, media_type="application/pdf",
                     headers={"Content-Disposition": 'attachment; filename="praja-raksha-complaint.pdf"'})
+
+
+# Serve the built React app (frontend/dist) so the whole product runs from one URL.
+FRONTEND_DIST = Path(__file__).resolve().parents[2] / "frontend" / "dist"
+if FRONTEND_DIST.exists():
+    app.mount("/assets", StaticFiles(directory=FRONTEND_DIST / "assets"), name="assets")
+
+    @app.get("/{path:path}", include_in_schema=False)
+    def spa(path: str):
+        file = FRONTEND_DIST / path
+        if path and file.is_file() and FRONTEND_DIST in file.resolve().parents:
+            return FileResponse(file)
+        return FileResponse(FRONTEND_DIST / "index.html")

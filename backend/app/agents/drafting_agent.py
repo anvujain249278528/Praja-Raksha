@@ -15,6 +15,7 @@ from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer
 from ..llm import generate
 
 _NUM = re.compile(r"^\s*\(?\d+[.)]\s*")
+_SALUTATION = re.compile(r"^\s*(respected\s+)?(sir|madam)(\s*/\s*(sir|madam))?\s*,\s*", re.IGNORECASE)
 _INLINE_NUM = re.compile(r"(?<=[.:])\s+(?=\d{1,2}\.\s)")
 
 DocType = Literal["fir_complaint", "sp_escalation", "magistrate_application"]
@@ -79,6 +80,9 @@ def draft(doc_type: DocType, analysis: dict, complainant: Complainant, evidence_
         d["to_block"] = d["to_block"].replace(", ", ",\n")
     # "facts: 1. x 2. y" -> each numbered fact on its own line
     d["body_paragraphs"] = [_INLINE_NUM.sub("\n", p) for p in d["body_paragraphs"]]
+    # We add the salutation ourselves; drop it if the AI also wrote one
+    d["body_paragraphs"] = [_SALUTATION.sub("", p) for p in d["body_paragraphs"]]
+    d["body_paragraphs"] = [p for p in d["body_paragraphs"] if p.strip()]
     for key in ("prayer", "enclosures"):  # remove numbering the AI added; we number ourselves
         d[key] = [_NUM.sub("", x) for x in d[key]]
     d["doc_type"] = doc_type
