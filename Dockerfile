@@ -14,6 +14,8 @@ ENV PYTHONUNBUFFERED=1 \
     AUTO_TRACK_MINUTES=60
 
 WORKDIR /app
+# Playwright's bundled Node driver needs libatomic, which the slim image does not include
+RUN apt-get update && apt-get install -y --no-install-recommends libatomic1 && rm -rf /var/lib/apt/lists/*
 COPY backend/requirements.txt backend/requirements.txt
 RUN pip install --no-cache-dir -r backend/requirements.txt \
  && python -m playwright install --with-deps --only-shell chromium
