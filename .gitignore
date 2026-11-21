@@ -5,3 +5,6 @@ node_modules/
 dist/
 *.pyc
 backend/app/data/*.db
+
+# personal screenshots
+samples/Screenshot*
