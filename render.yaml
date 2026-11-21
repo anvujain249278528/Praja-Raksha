@@ -1,0 +1,13 @@
+# Render Blueprint: one free Docker web service for the whole app (React UI + FastAPI + browser agents).
+services:
+  - type: web
+    name: praja-raksha
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /api/health
+    envVars:
+      - key: GEMINI_API_KEY
+        sync: false          # Render asks you to paste it; it is never stored in the code
+      - key: AUTO_TRACK_MINUTES
+        value: "60"

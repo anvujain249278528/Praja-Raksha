@@ -17,6 +17,9 @@ from ..config import PORTAL_URL
 from ..llm import generate
 
 MAX_STEPS = 8
+# Flags that keep headless Chromium small enough for a 512 MB free server (Docker has a tiny /dev/shm).
+BROWSER_ARGS = ["--disable-dev-shm-usage", "--disable-gpu", "--disable-extensions", "--no-zygote",
+                "--disable-background-networking", "--renderer-process-limit=1", "--js-flags=--max-old-space-size=128"]
 _browser_lock = threading.Semaphore(1)  # one browser at a time keeps memory use low
 JOBS: dict[str, dict] = {}
 
@@ -105,7 +108,7 @@ def _apply(page, fills: list[FieldFill]):
 
 def _run(job: dict, case: dict):
     with _browser_lock, sync_playwright() as p:
-        browser = p.chromium.launch()
+        browser = p.chromium.launch(args=BROWSER_ARGS)
         try:
             page = browser.new_page(viewport={"width": 900, "height": 1000})
             page.goto(PORTAL_URL, wait_until="networkidle")

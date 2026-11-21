@@ -10,21 +10,21 @@ RUN npm run build
 FROM python:3.12-slim
 ENV PYTHONUNBUFFERED=1 \
     PLAYWRIGHT_BROWSERS_PATH=/ms-playwright \
-    PORT=7860 \
+    PORT=10000 \
     AUTO_TRACK_MINUTES=60
 
 WORKDIR /app
 COPY backend/requirements.txt backend/requirements.txt
 RUN pip install --no-cache-dir -r backend/requirements.txt \
- && python -m playwright install --with-deps chromium
+ && python -m playwright install --with-deps --only-shell chromium
 
 COPY backend/ backend/
 COPY --from=frontend /build/dist frontend/dist
 
-# Hugging Face Spaces runs the container as user 1000; it must be able to write the SQLite database.
+# Run as a normal user (not root); it must be able to write the SQLite database.
 RUN useradd -m -u 1000 user && chown -R user:user /app
 USER user
 
 WORKDIR /app/backend
-EXPOSE 7860
-CMD ["sh", "-c", "uvicorn app.main:app --host 0.0.0.0 --port ${PORT}"]
+EXPOSE 10000
+CMD ["sh", "-c", "uvicorn app.main:app --host 0.0.0.0 --port ${PORT} --workers 1"]

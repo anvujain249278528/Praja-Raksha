@@ -1,14 +1,3 @@
----
-title: Praja Raksha
-emoji: 🛡️
-colorFrom: blue
-colorTo: yellow
-sdk: docker
-app_port: 7860
-pinned: false
-short_description: Multilingual AI agents for legal help and complaints
----
-
 # Praja Raksha: Your AI Legal Shield
 
 > **Speak your problem. Know your rights. Get it filed.**

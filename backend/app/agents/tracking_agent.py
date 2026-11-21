@@ -16,7 +16,7 @@ from playwright.sync_api import sync_playwright
 from .. import db
 from ..config import PORTAL_URL
 from . import drafting_agent
-from .filing_agent import _browser_lock
+from .filing_agent import BROWSER_ARGS, _browser_lock
 
 SP_AFTER_DAYS = 14          # police may take up to 14 days for a preliminary enquiry (BNSS 173(3))
 MAGISTRATE_AFTER_DAYS = 30  # if the SP also does not act
@@ -27,7 +27,7 @@ LEVELS = {1: ("sp_escalation", "Letter to the Superintendent of Police (BNSS 173
 def check_portal(ack: str) -> dict:
     """Read the complaint's status from the portal's public tracking page, like a person would."""
     with _browser_lock, sync_playwright() as p:
-        browser = p.chromium.launch()
+        browser = p.chromium.launch(args=BROWSER_ARGS)
         try:
             page = browser.new_page()
             page.goto(PORTAL_URL.rstrip("/") + "/track", wait_until="networkidle")
