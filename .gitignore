@@ -8,3 +8,6 @@ backend/app/data/*.db
 
 # personal screenshots
 samples/Screenshot*
+
+# personal prep docs
+Judges_QA_CheatSheet.pdf

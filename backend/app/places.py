@@ -59,6 +59,24 @@ def distance_km(lat1, lon1, lat2, lon2) -> float:
     return round(2 * r * math.asin(math.sqrt(a)), 2)
 
 
+def _bundled(lat: float, lon: float, radius_m: int) -> list[dict]:
+    """Police stations from the bundled OpenStreetMap snapshot (data/police_osm.json) within the radius."""
+    global _snapshot
+    if _snapshot is None:
+        path = DATA_DIR / "police_osm.json"
+        _snapshot = json.loads(path.read_text(encoding="utf-8"))["stations"] if path.exists() else []
+    out = []
+    for s in _snapshot:
+        if distance_km(lat, lon, s["lat"], s["lon"]) * 1000 <= radius_m:
+            _, osm_type, osm_id = s["id"].split("-", 2)
+            out.append({"type": osm_type, "id": osm_id, "lat": s["lat"], "lon": s["lon"], "tags": s["tags"],
+                        "address": s.get("address", "")})
+    return out
+
+
+_snapshot = None
+
+
 def police_stations(lat: float, lon: float, radius_m: int = 8000) -> list[dict]:
     key = (round(lat, 2), round(lon, 2), radius_m)
     if key in _cache and time.time() - _cache[key][0] < 3600:
@@ -68,11 +86,21 @@ def police_stations(lat: float, lon: float, radius_m: int = 8000) -> list[dict]:
         (node["amenity"="police"](around:{radius_m},{lat},{lon});
          way["amenity"="police"](around:{radius_m},{lat},{lon}););
         out center tags;"""
-        try:
-            elements = _nominatim(lat, lon, radius_m)
-        except Exception as e:
-            print(f"[places] nominatim failed, using overpass: {e}")
-            elements = _overpass(query)
+        # Bundled OpenStreetMap snapshot first (fast, and public map servers often block cloud servers);
+        # live lookup only for places outside the snapshot.
+        elements = _bundled(lat, lon, radius_m)
+        if len(elements) < 3:
+            try:
+                elements = _nominatim(lat, lon, radius_m)
+            except Exception as e:
+                print(f"[places] nominatim failed ({type(e).__name__}), trying overpass")
+                try:
+                    elements = _overpass(query)
+                except Exception:
+                    # Live servers unavailable: use the snapshot with a wider radius rather than failing
+                    elements = _bundled(lat, lon, 25000)
+                    if not elements:
+                        raise
         stations = []
         for e in elements:
             t = e.get("tags", {})
