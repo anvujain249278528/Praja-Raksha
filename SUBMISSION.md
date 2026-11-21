@@ -73,6 +73,6 @@ Built with the help of Claude Code as an AI coding assistant.
 
 ## Links
 
-- Working MVP: _add after deployment_
+- Working MVP: https://praja-raksha.onrender.com  (free hosting: first visit after idle may take ~1 minute to wake up)
 - Demo video: _add after recording_
-- GitHub: _add after pushing_
+- GitHub: https://github.com/anvujain249278528/Praja-Raksha

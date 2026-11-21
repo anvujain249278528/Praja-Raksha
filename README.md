@@ -7,7 +7,9 @@ go from *"I don't know what to do"* to *a filed police complaint that is tracked
 
 Built for **IDEA//FORGE 2026**, Track 1: *Civic Pulse, Digital Governance & Public Information*.
 
-**Live demo:** _add link after deployment_ · **Demo video:** _add link_
+**Live demo:** https://praja-raksha.onrender.com · **Code:** https://github.com/anvujain249278528/Praja-Raksha · **Demo video:** _add link_
+
+> Free hosting: if the site has been idle, the first visit can take up to a minute to wake up.
 
 ---
 
