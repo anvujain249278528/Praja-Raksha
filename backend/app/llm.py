@@ -51,5 +51,14 @@ def generate(contents, config: types.GenerateContentConfig):
         except Exception as e:  # network errors, timeouts, bad JSON
             last_error = e
         _cooldown_until[model] = time.time() + COOLDOWN_SECONDS
-        print(f"[llm] {model} failed, cooling down: {str(last_error)[:80]}")
-    raise RuntimeError(f"All AI models are busy right now. Please retry. ({last_error})")
+        print(f"[llm] {model} failed, cooling down: {_safe(last_error)}")
+    # Never put the underlying error in the user-facing message: it can contain request details.
+    raise RuntimeError("All AI models are busy right now. Please try again in a minute.")
+
+
+def _safe(err) -> str:
+    """Error text for server logs only, with the API key removed and length limited."""
+    text = str(err)
+    if GEMINI_API_KEY:
+        text = text.replace(GEMINI_API_KEY, "***")
+    return type(err).__name__ + ": " + text[:120]

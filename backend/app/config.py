@@ -6,7 +6,19 @@ from dotenv import load_dotenv
 BASE_DIR = Path(__file__).resolve().parent
 load_dotenv(BASE_DIR.parent / ".env")
 
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
+
+def _clean_key(raw: str) -> str:
+    """Accept a key pasted with extra text (e.g. a whole .env file): keep only the key itself."""
+    for line in raw.replace("\r", "\n").split("\n"):
+        line = line.strip().strip('"').strip("'")
+        if line.startswith("GEMINI_API_KEY="):
+            line = line.split("=", 1)[1].strip().strip('"').strip("'")
+        if line and "=" not in line:
+            return line
+    return ""
+
+
+GEMINI_API_KEY = _clean_key(os.getenv("GEMINI_API_KEY", ""))
 GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-3.8-flash")
 DATA_DIR = BASE_DIR / "data"
 PORT = int(os.getenv("PORT", "8000"))

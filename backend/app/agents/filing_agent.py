@@ -14,7 +14,7 @@ from playwright.sync_api import sync_playwright
 from pydantic import BaseModel, Field
 
 from ..config import PORTAL_URL
-from ..llm import generate
+from ..llm import _safe, generate
 
 MAX_STEPS = 8
 # Flags that keep headless Chromium small enough for a 512 MB free server (Docker has a tiny /dev/shm).
@@ -162,7 +162,7 @@ def start(case: dict, on_done=None) -> str:
                 on_done(job["ack_no"])
         except Exception as e:  # report any failure to the user instead of crashing
             job["status"] = "error"
-            job["error"] = str(e)[:300]
+            job["error"] = _safe(e)  # never expose raw error details (they can contain request data)
             job["steps"].append({"t": round(time.time() - job["started"], 1), "text": "Stopped: " + job["error"], "shot": None})
 
     threading.Thread(target=worker, daemon=True).start()

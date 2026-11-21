@@ -164,7 +164,8 @@ def text_to_speech(req: TtsRequest):
     try:
         audio = tts.synthesize(req.text, req.lang)
     except Exception as e:
-        raise HTTPException(503, f"Voice service unavailable: {str(e)[:80]}")
+        print(f"[tts] {type(e).__name__}")
+        raise HTTPException(503, "Voice service unavailable right now.")
     if audio is None:
         raise HTTPException(404, "No server voice for this language")
     return Response(audio, media_type="audio/mpeg", headers={"Cache-Control": "private, max-age=3600"})
@@ -195,7 +196,8 @@ def nearby_police(lat: float, lon: float, radius_km: float = 8):
     try:
         return places.police_stations(lat, lon, int(min(radius_km, 25) * 1000))
     except Exception as e:
-        raise HTTPException(503, f"Map service is busy, please retry. ({str(e)[:80]})")
+        print(f"[places] {type(e).__name__}")
+        raise HTTPException(503, "Map service is busy, please retry.")
 
 
 @app.get("/api/places/lawyers")
