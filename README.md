@@ -162,7 +162,6 @@ samples/         sample WhatsApp threat screenshot and generated FIR PDF
 - **Libraries:** FastAPI, Uvicorn, Playwright, ReportLab, React, Vite, Tailwind CSS, Leaflet / React-Leaflet, Lucide icons, Pydantic
 - **Data:** OpenStreetMap contributors (map tiles, Nominatim, Overpass), Google News RSS, NCRB *Crime in India 2022*,
   India Code (bare acts), government helpline directories
-- **Development:** built with the help of Chatgpt
 
 ## Disclaimer
 

@@ -67,7 +67,6 @@ first), plus free legal aid and lawyers matched to the case, with citizen rating
 
 **Note for judges:** for safety, the Filing Agent operates a demo e-complaint portal that simulates a government site (real portals
 need OTP/CAPTCHA and must not receive test complaints). Demo lawyers, the Demo Police Station and sample reviews are clearly labelled.
-Built with the help of Claude Code as an AI coding assistant.
 
 ---
 
