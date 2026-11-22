@@ -15,8 +15,8 @@ const NCRB = [
 
 // Illustrative examples of how the product is meant to help. Not real people or real cases.
 const SCENARIOS = [
-  { who: 'College student, Mysuru', problem: 'Ex-partner threatening to leak private photos unless paid Rs 50,000.',
-    flow: ['Spoke in Kannada and uploaded the WhatsApp screenshot', 'Extortion, intimidation and stalking sections found', 'Agent filed an anonymous cyber complaint'],
+  { who: 'College student, Mysuru', problem: 'Lost Rs 45,000 to a fake part-time "task" job on Telegram.',
+    flow: ['Spoke in Kannada and uploaded the payment screenshots', 'Cheating (BNS 318) and IT Act 66D identified', 'Agent filed the cyber complaint with the scammer\'s UPI IDs'],
     result: 'Complaint filed in about 3 minutes, without visiting a police station.', time: '3 min' },
   { who: 'Retired teacher, Bengaluru', problem: 'Lost Rs 1.2 lakh to a fake "digital arrest" video call.',
     flow: ['Told to call 1930 first so the bank can freeze the money', 'Cheating by personation (IT Act 66D) identified', 'Nearest cyber crime police station shown on the map'],
