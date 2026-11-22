@@ -99,7 +99,7 @@ export default function Nearby({ params }) {
       <div className="mt-5 flex flex-wrap items-end gap-3">
         <div className="flex rounded-xl bg-slate-200 p-1" role="tablist">
           {[['police', Shield, 'Police stations'], ['lawyers', Scale, 'Lawyers & legal aid']].map(([id, Icon, label]) => (
-            <button key={id} role="tab" aria-selected={tab === id} onClick={() => setTab(id)}
+            <button key={id} role="tab" aria-selected={tab === id} onClick={() => { if (id !== tab) { setItems(null); setSelected(null); setTab(id) } }}
               className={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition ${tab === id ? 'bg-white text-brand-700 shadow' : 'text-slate-600'}`}>
               <Icon size={16} /> {label}
             </button>
@@ -159,7 +159,7 @@ export default function Nearby({ params }) {
                     </div>
                     <p className="mt-0.5 flex items-center gap-1 text-xs text-slate-500"><MapPin size={12} />{p.distance_km} km{p.address ? ` · ${p.address}` : ''}</p>
                     {tab === 'lawyers' && (
-                      <p className="mt-1 text-xs text-slate-600">{p.specialisations.join(', ')} · {p.languages.join(', ')}{p.experience_years ? ` · ${p.experience_years} yrs` : ''}<br />{p.fee}</p>
+                      <p className="mt-1 text-xs text-slate-600">{(p.specialisations || []).join(', ')} · {(p.languages || []).join(', ')}{p.experience_years ? ` · ${p.experience_years} yrs` : ''}<br />{p.fee}</p>
                     )}
                     <button onClick={(e) => { e.stopPropagation(); setReviewing(p) }} className="mt-2 flex items-center gap-2 text-sm text-slate-600 hover:text-brand-700">
                       <Stars value={p.rating} size={14} />
